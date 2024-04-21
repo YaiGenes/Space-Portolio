@@ -11,7 +11,7 @@ const Navbar = () => {
           className="h-auto w-auto flex flex-row items-center"
         >
           <Image
-            src="/NavLogo.png"
+            src="/logo-last.png"
             alt="logo"
             width={70}
             height={70}
@@ -19,7 +19,7 @@ const Navbar = () => {
           />
 
           <span className="font-bold ml-[10px] hidden md:block text-gray-300">
-            WebChain Dev
+            Yaigenes - Site Reliability Engineer
           </span>
         </a>
 
@@ -28,8 +28,8 @@ const Navbar = () => {
             <a href="#about-me" className="cursor-pointer">
               About me
             </a>
-            <a href="#skills" className="cursor-pointer">
-              Skills
+            <a href="https://pdfhost.io/v/aSB7MFRFk_cv_updated_plus_references" className="cursor-pointer">
+              Download CV
             </a>
             <a href="#projects" className="cursor-pointer">
               Projects

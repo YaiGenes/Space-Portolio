@@ -24,7 +24,7 @@ const HeroContent = () => {
         >
           <SparklesIcon className="text-[#b49bff] mr-[10px] h-5 w-5" />
           <h1 className="Welcome-text text-[13px]">
-            Fullstack Developer Portfolio
+            Site Reliability Engineer Blog/Portfolio
           </h1>
         </motion.div>
 
@@ -38,7 +38,7 @@ const HeroContent = () => {
               {" "}
               the best{" "}
             </span>
-            project exprience
+            project deployment and reliability experience
           </span>
         </motion.div>
 
@@ -46,10 +46,12 @@ const HeroContent = () => {
           variants={slideInFromLeft(0.8)}
           className="text-lg text-gray-400 my-5 max-w-[600px]"
         >
-          I&apos;m a Full Stack Software Engineer with experience in Website,
-          Mobile, and Software development. Check out my projects and skills.
+          As a Site Reliability Engineer with over 3.5 years of experience at a leading tech company as Accenture, atSistemas and currently Triggle Spain SLU, I specialized in optimizing system reliability and efficiency.
         </motion.p>
         <motion.a
+          href="https://www.linkedin.com/in/yaigenes"
+          target="_blank"
+          rel="noopener noreferrer"
           variants={slideInFromLeft(1)}
           className="py-2 button-primary text-center text-white cursor-pointer rounded-lg max-w-[200px]"
         >
