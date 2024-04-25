@@ -28,7 +28,7 @@ const Navbar = () => {
             <a href="#about-me" className="cursor-pointer">
               About me
             </a>
-            <a href="https://pdfhost.io/v/aSB7MFRFk_cv_updated_plus_references" className="cursor-pointer">
+            <a href="https://www.scribd.com/document/726563418/Cv-Yaiser-Avila-Rodriguez-04-24" className="cursor-pointer">
               Download CV
             </a>
             <a href="#projects" className="cursor-pointer">
