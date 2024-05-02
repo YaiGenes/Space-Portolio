@@ -69,3 +69,7 @@
 html {
   scroll-behavior: smooth;
 }
+
+.projectCard {
+  flex: 0 1 calc(33.33% - 40px / 3 - 80px / 3);
+}
