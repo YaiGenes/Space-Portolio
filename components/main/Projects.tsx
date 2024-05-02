@@ -38,42 +38,6 @@ const Projects = () => {
           outtitle="Outcome"
           outdescription="27% cost reduction by autoscaling policies, 10% cost saving through efficient cleanup cron jobs -> Improved budget efficiency and resource utilization"
         />
-        <ProjectCard
-          src="/boats.webp"
-          title="Tourism Platform-as-a-Service (PaaS) Cost Optimization"
-          description="In my role at Triggle SLU, a cloud-native company serving the tourism sector, I led a major initiative to reduce platform costs across AWS accounts. By implementing targeted optimizations and refining resource usage, I achieved a 27% reduction in overall platform costs. Key strategies included enhancing autoscaling capabilities, apply cleanup policies, automate cleanups using crons and revising our resource allocation to better fit usage patterns."
-          techtitle="Technologies Used"
-          techdescription="AWS, argoCD, Codebuild, Terraform, CASTAI"
-          outtitle="Outcome"
-          outdescription="27% cost reduction by autoscaling policies, 10% cost saving through efficient cleanup cron jobs -> Improved budget efficiency and resource utilization"
-        />
-        <ProjectCard
-          src="/boats.webp"
-          title="Tourism Platform-as-a-Service (PaaS) Cost Optimization"
-          description="In my role at Triggle SLU, a cloud-native company serving the tourism sector, I led a major initiative to reduce platform costs across AWS accounts. By implementing targeted optimizations and refining resource usage, I achieved a 27% reduction in overall platform costs. Key strategies included enhancing autoscaling capabilities, apply cleanup policies, automate cleanups using crons and revising our resource allocation to better fit usage patterns."
-          techtitle="Technologies Used"
-          techdescription="AWS, argoCD, Codebuild, Terraform, CASTAI"
-          outtitle="Outcome"
-          outdescription="27% cost reduction by autoscaling policies, 10% cost saving through efficient cleanup cron jobs -> Improved budget efficiency and resource utilization"
-        />
-        <ProjectCard
-          src="/boats.webp"
-          title="Tourism Platform-as-a-Service (PaaS) Cost Optimization"
-          description="In my role at Triggle SLU, a cloud-native company serving the tourism sector, I led a major initiative to reduce platform costs across AWS accounts. By implementing targeted optimizations and refining resource usage, I achieved a 27% reduction in overall platform costs. Key strategies included enhancing autoscaling capabilities, apply cleanup policies, automate cleanups using crons and revising our resource allocation to better fit usage patterns."
-          techtitle="Technologies Used"
-          techdescription="AWS, argoCD, Codebuild, Terraform, CASTAI"
-          outtitle="Outcome"
-          outdescription="27% cost reduction by autoscaling policies, 10% cost saving through efficient cleanup cron jobs -> Improved budget efficiency and resource utilization"
-        />
-        <ProjectCard
-          src="/boats.webp"
-          title="Tourism Platform-as-a-Service (PaaS) Cost Optimization"
-          description="In my role at Triggle SLU, a cloud-native company serving the tourism sector, I led a major initiative to reduce platform costs across AWS accounts. By implementing targeted optimizations and refining resource usage, I achieved a 27% reduction in overall platform costs. Key strategies included enhancing autoscaling capabilities, apply cleanup policies, automate cleanups using crons and revising our resource allocation to better fit usage patterns."
-          techtitle="Technologies Used"
-          techdescription="AWS, argoCD, Codebuild, Terraform, CASTAI"
-          outtitle="Outcome"
-          outdescription="27% cost reduction by autoscaling policies, 10% cost saving through efficient cleanup cron jobs -> Improved budget efficiency and resource utilization"
-        />
       </div>
     </div>
   );
