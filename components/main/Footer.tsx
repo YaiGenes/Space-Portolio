@@ -16,7 +16,7 @@ const Footer = () => {
             <div className="w-full h-full flex flex-row items-center justify-around flex-wrap">
                 
 
-                <div className="min-w-[200px] h-auto flex flex-col items-center justify-start">
+                {/* <div className="min-w-[200px] h-auto flex flex-col items-center justify-start">
                     <div className="font-bold text-[16px]">Community</div>
                     <p className="flex flex-row items-center my-[15px] cursor-pointer">
                         <FaYoutube />
@@ -30,8 +30,8 @@ const Footer = () => {
                         <RxDiscordLogo />
                         <span className="text-[15px] ml-[6px]">Discord</span>    
                     </p>
-                </div>
-                <div className="min-w-[200px] h-auto flex flex-col items-center justify-start">
+                </div> */}
+                {/* <div className="min-w-[200px] h-auto flex flex-col items-center justify-start">
                     <div className="font-bold text-[16px]">Social Media</div>
                     <p className="flex flex-row items-center my-[15px] cursor-pointer">
                         <FaYoutube />
@@ -45,20 +45,20 @@ const Footer = () => {
                         <RxDiscordLogo />
                         <span className="text-[15px] ml-[6px]">Linkedin</span>    
                     </p>
-                </div>
+                </div> */}
                 <div className="min-w-[200px] h-auto flex flex-col items-center justify-start">
-                    <div className="font-bold text-[16px]">About</div>
-                   <p className="flex flex-row items-center my-[15px] cursor-pointer">
+                    <div className="font-bold text-[16px]">Contact</div>
+                   {/* <p className="flex flex-row items-center my-[15px] cursor-pointer">
                      
                         <span className="text-[15px] ml-[6px]">Become Sponsor</span>    
-                    </p>
-                    <p className="flex flex-row items-center my-[15px] cursor-pointer">
+                    </p> */}
+                    {/* <a href="#about-me"className="flex flex-row items-center my-[15px] cursor-pointer">
                       
-                        <span className="text-[15px] ml-[6px]">Learning about me</span>    
-                    </p>
+                        <a href="#about-me" className="text-[15px] ml-[6px]">Learning about me</a>
+                    </a> */}
                     <p className="flex flex-row items-center my-[15px] cursor-pointer">
                   
-                        <span className="text-[15px] ml-[6px]">yaigenes@gmail.com</span>    
+                        <span className="text-[15px] ml-[6px]">yaigenes@infrabio.dev</span>    
                     </p>
                 </div>
             </div>

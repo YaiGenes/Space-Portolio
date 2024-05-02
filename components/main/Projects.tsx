@@ -12,19 +12,31 @@ const Projects = () => {
       </h1>
       <div className="h-full w-full flex flex-col md:flex-row gap-10 px-10">
         <ProjectCard
+          src="/leadership.webp"
+          title="EKS Quantic Update and Leadership"
+          description="I oversaw the update of EKS clusters from version 1.24 to 1.29, which reduced the costs of extended support by 82.5% due to more efficient use of autoscaling groups. Additionally, I have been managing a team of three engineers in automating key infrastructure components"
+          techtitle="Technologies Used"
+          techdescription="Terraform, Terraformer, Velero, Kubernetes (EKS), AWS Auto Scaling"
+          outtitle="Outcome"
+          outdescription="82.5% reduction in extended support costs due to cluster updates -> Enhanced system scalability and reliability"
+        />
+        <ProjectCard
           src="/second_project.webp"
-          title="EKS ZeroDowntime Upgrader"
-          description="The EKS ZeroDowntime Upgrader is a robust tool designed to manage updates and upgrades within Amazon Elastic Kubernetes Service (EKS) clusters without causing any service interruptions. This project aims to automate the process of applying version upgrades, node group updates, and configuration changes seamlessly, ensuring that applications continue to operate smoothly during the transition."
+          title="CI/CD Automation and Deployment Acceleration"
+          description="Focusing on improving operational efficiency, I spearheaded the automation of the continuous integration and continuous deployment (CI/CD) pipelines, enhance the build time using concurrency and docker caching. This project involved overhauling existing deployment methodologies and introducing automation scripts that streamlined the deployment process."
+          techtitle="Technologies Used"
+          techdescription="Codebuild, Bitbucket, Lambdas, API Gateway, Python, Bash"
+          outtitle="Outcome"
+          outdescription="Deployment and build times reduced by 500% -> Enhanced consistency and reliability in deployments"
         />
         <ProjectCard
-          src="/third_project.webp"
-          title="ConcurrentFlow Deployer"
-          description="ConcurrentFlow Deployer is designed to streamline and accelerate the CI/CD pipeline using advanced concurrency models and Docker's built-in caching mechanisms. This project aims to reduce build and deployment times significantly by optimizing resource utilization and minimizing rebuilds."
-        />
-        <ProjectCard
-          src="/first_project.webp"
-          title="IaC EnviroProvisioner"
-          description="The IaC EnviroProvisioner is a sophisticated tool designed to automate the provisioning and management of computing environments using Infrastructure as Code (IaC) methodologies. This project utilizes Terraform, Terragrunt, and Spacelift, targeting the AWS platform to streamline the setup, scaling, and maintenance of infrastructure, ensuring consistent and repeatable deployments."
+          src="/boats.webp"
+          title="Tourism Platform-as-a-Service (PaaS) Cost Optimization"
+          description="In my role at Triggle SLU, a cloud-native company serving the tourism sector, I led a major initiative to reduce platform costs across AWS accounts. By implementing targeted optimizations and refining resource usage, I achieved a 27% reduction in overall platform costs. Key strategies included enhancing autoscaling capabilities, apply cleanup policies, automate cleanups using crons and revising our resource allocation to better fit usage patterns."
+          techtitle="Technologies Used"
+          techdescription="AWS, argoCD, Codebuild, Terraform, CASTAI"
+          outtitle="Outcome"
+          outdescription="27% cost reduction by autoscaling policies, 10% cost saving through efficient cleanup cron jobs -> Improved budget efficiency and resource utilization"
         />
       </div>
     </div>
