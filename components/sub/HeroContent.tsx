@@ -9,8 +9,10 @@ import {
 } from "@/utils/motion";
 import { SparklesIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
+import { useLanguage } from "@/context/LanguageContext";
 
 const HeroContent = () => {
+  const { t } = useLanguage();
   return (
     <motion.div
       initial="hidden"
@@ -23,9 +25,7 @@ const HeroContent = () => {
           className="Welcome-box py-[8px] px-[7px] border border-[#7042f88b] opacity-[0.9]"
         >
           <SparklesIcon className="text-[#b49bff] mr-[10px] h-5 w-5" />
-          <h1 className="Welcome-text text-[13px]">
-            Site Reliability Engineer Blog/Portfolio
-          </h1>
+          <h1 className="Welcome-text text-[13px]">{t.hero.badge}</h1>
         </motion.div>
 
         <motion.div
@@ -33,12 +33,11 @@ const HeroContent = () => {
           className="flex flex-col gap-6 mt-6 text-6xl font-bold text-white max-w-[600px] w-auto h-auto"
         >
           <span>
-            Providing
+            {t.hero.h1}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-cyan-500">
-              {" "}
-              the best{" "}
+              {t.hero.h1accent}
             </span>
-            project deployment and reliability experience
+            {t.hero.h2}
           </span>
         </motion.div>
 
@@ -46,17 +45,27 @@ const HeroContent = () => {
           variants={slideInFromLeft(0.8)}
           className="text-lg text-gray-400 my-5 max-w-[600px]"
         >
-          As a Site Reliability Engineer with over 3.5 years of experience at a leading tech company as Accenture, atSistemas and currently Triggle Spain SLU, I specialized in optimizing system reliability and efficiency.
+          {t.hero.sub}
         </motion.p>
-        <motion.a
-          href="https://www.linkedin.com/in/yaigenes"
-          target="_blank"
-          rel="noopener noreferrer"
+
+        <motion.div
           variants={slideInFromLeft(1)}
-          className="py-2 button-primary text-center text-white cursor-pointer rounded-lg max-w-[200px]"
+          className="flex flex-row gap-4"
         >
-          Learn More!
-        </motion.a>
+          <a
+            href="#about"
+            className="py-2 button-primary text-center text-white cursor-pointer rounded-lg max-w-[200px] px-6"
+          >
+            {t.hero.ctaAbout}
+          </a>
+          <a
+            href="/resume.pdf"
+            download
+            className="py-2 px-6 text-center text-white cursor-pointer rounded-lg max-w-[200px] border border-[#7042f8] hover:bg-[#7042f820] transition-colors"
+          >
+            {t.hero.ctaCv}
+          </a>
+        </motion.div>
       </div>
 
       <motion.div

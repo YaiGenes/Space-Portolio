@@ -1,74 +1,57 @@
 import React from "react";
-import {
-  RxDiscordLogo,
-  RxGithubLogo,
-  RxInstagramLogo,
-  RxTwitterLogo,
-  RxLinkedinLogo,
-} from "react-icons/rx";
-
-import { FaYoutube } from "react-icons/fa";
+import { RxGithubLogo, RxLinkedinLogo } from "react-icons/rx";
 
 const Footer = () => {
   return (
-    <div className="w-full h-full bg-transparent text-gray-200 shadow-lg p-[15px] ">
-        <div className="w-full flex flex-col items-center justify-center m-auto">
-            <div className="w-full h-full flex flex-row items-center justify-around flex-wrap">
-                
-
-                {/* <div className="min-w-[200px] h-auto flex flex-col items-center justify-start">
-                    <div className="font-bold text-[16px]">Community</div>
-                    <p className="flex flex-row items-center my-[15px] cursor-pointer">
-                        <FaYoutube />
-                        <span className="text-[15px] ml-[6px]">Youtube</span>    
-                    </p>
-                    <p className="flex flex-row items-center my-[15px] cursor-pointer">
-                        <RxGithubLogo />
-                        <span className="text-[15px] ml-[6px]">Github</span>    
-                    </p>
-                    <p className="flex flex-row items-center my-[15px] cursor-pointer">
-                        <RxDiscordLogo />
-                        <span className="text-[15px] ml-[6px]">Discord</span>    
-                    </p>
-                </div> */}
-                {/* <div className="min-w-[200px] h-auto flex flex-col items-center justify-start">
-                    <div className="font-bold text-[16px]">Social Media</div>
-                    <p className="flex flex-row items-center my-[15px] cursor-pointer">
-                        <FaYoutube />
-                        <span className="text-[15px] ml-[6px]">Instagram</span>    
-                    </p>
-                    <p className="flex flex-row items-center my-[15px] cursor-pointer">
-                        <RxGithubLogo />
-                        <span className="text-[15px] ml-[6px]">Twitter</span>    
-                    </p>
-                    <p className="flex flex-row items-center my-[15px] cursor-pointer">
-                        <RxDiscordLogo />
-                        <span className="text-[15px] ml-[6px]">Linkedin</span>    
-                    </p>
-                </div> */}
-                <div className="min-w-[200px] h-auto flex flex-col items-center justify-start">
-                    <div className="font-bold text-[16px]">Contact</div>
-                   {/* <p className="flex flex-row items-center my-[15px] cursor-pointer">
-                     
-                        <span className="text-[15px] ml-[6px]">Become Sponsor</span>    
-                    </p> */}
-                    {/* <a href="#about-me"className="flex flex-row items-center my-[15px] cursor-pointer">
-                      
-                        <a href="#about-me" className="text-[15px] ml-[6px]">Learning about me</a>
-                    </a> */}
-                    <p className="flex flex-row items-center my-[15px] cursor-pointer">
-                  
-                        <span className="text-[15px] ml-[6px]">yaigenes@infrabio.dev</span>    
-                    </p>
-                </div>
-            </div>
-
-            <div className="mb-[20px] text-[15px] text-center">
-                &copy; Yaigenes 2024, bootstrapped from Mif2006
-            </div>
+    <footer className="w-full border-t border-[#2A0E61]/50 bg-transparent text-gray-400 py-8 px-6 md:px-10">
+      <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="flex flex-col items-center md:items-start gap-1">
+          <span className="font-display font-semibold text-white text-sm">
+            Yaiser Avila Rodríguez
+          </span>
+          <span className="text-xs text-gray-500">Site Reliability Engineer</span>
         </div>
-    </div>
-  )
-}
 
-export default Footer
+        <nav className="flex items-center gap-6 text-sm">
+          <a href="#about" className="hover:text-purple-400 transition-colors">About</a>
+          <a href="#experience" className="hover:text-purple-400 transition-colors">Experience</a>
+          <a href="#projects" className="hover:text-purple-400 transition-colors">Projects</a>
+          <a href="#contact" className="hover:text-purple-400 transition-colors">Contact</a>
+        </nav>
+
+        <div className="flex items-center gap-4">
+          <a
+            href="https://www.linkedin.com/in/yaigenes"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="LinkedIn"
+            className="hover:text-purple-400 transition-colors"
+          >
+            <RxLinkedinLogo size={18} />
+          </a>
+          <a
+            href="https://github.com/YaiGenes"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GitHub"
+            className="hover:text-gray-200 transition-colors"
+          >
+            <RxGithubLogo size={18} />
+          </a>
+          <a
+            href="mailto:yaigenes@infrabio.dev"
+            className="font-mono text-xs hover:text-purple-400 transition-colors"
+          >
+            yaigenes@infrabio.dev
+          </a>
+        </div>
+      </div>
+
+      <p className="text-center text-xs text-gray-600 mt-6">
+        &copy; Yaiser Avila Rodríguez 2026
+      </p>
+    </footer>
+  );
+};
+
+export default Footer;
