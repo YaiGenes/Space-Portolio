@@ -844,11 +844,14 @@ function CostSimulator() {
   const wastePct = estimateWaste(clusters);
 
   // All savings calculated in USD, converted to selected currency for display
-  const vpaSavings     = Math.round(monthlyBill * 0.259 * 12);
+  // VPA: 25.9% fleet-wide (documented). HPA adds up to 12% more by scaling with fleet size —
+  // larger fleets have more variable-traffic workloads benefiting from horizontal autoscaling.
+  const hpaPct         = Math.min(0.12, (clusters / 200) * 0.10);
+  const vpaHpaSavings  = Math.round(monthlyBill * (0.259 + hpaPct) * 12);
   const gitopsSavings  = Math.round((clusters / 200) * 30 * sreCount * 12 * hourlyRate);
   const autoRemSavings = Math.round(clusters * 0.05 * (35 / 60) * hourlyRate * 12);
-  const total          = vpaSavings + gitopsSavings + autoRemSavings;
-  const maxSav         = Math.max(vpaSavings, gitopsSavings, autoRemSavings, 1);
+  const total          = vpaHpaSavings + gitopsSavings + autoRemSavings;
+  const maxSav         = Math.max(vpaHpaSavings, gitopsSavings, autoRemSavings, 1);
 
   const investment = 160 * hourlyRate;
   const paybackWks = total > 0 ? (investment / (total / 52)).toFixed(1) : "∞";
@@ -901,9 +904,9 @@ function CostSimulator() {
 
       {/* Breakdown */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
-        <SavingsBar label={s.vpa}
-          sub={`25.9% of ${sym}${(monthlyBill * rate / 1000).toFixed(0)}K/mo`}
-          value={vpaSavings * rate} maxValue={maxSav * rate} color="#4ade80" sym={sym} />
+        <SavingsBar label={s.vpaHpa}
+          sub={`VPA ${(0.259 * 100).toFixed(1)}% + HPA ${(hpaPct * 100).toFixed(1)}% of bill · ${clusters} clusters`}
+          value={vpaHpaSavings * rate} maxValue={maxSav * rate} color="#4ade80" sym={sym} />
         <SavingsBar label={s.gitops}
           sub={`${sreCount} SRE${sreCount > 1 ? "s" : ""} × 30 hrs/release × 12 · ${clusters} clusters`}
           value={gitopsSavings * rate} maxValue={maxSav * rate} color="#38bdf8" sym={sym} />
@@ -932,6 +935,103 @@ function CostSimulator() {
           <p className="text-[9px] text-gray-700 mt-1">CAST AI · Datadog · Kubecost benchmarks</p>
         </div>
       </div>
+
+      {/* ── Sales pitch ── */}
+      {(() => {
+        const annualSreCost = hourlyRate * 1600; // ~full-time annual cost at market rate
+        const netYear1      = total - annualSreCost;
+        const roi           = annualSreCost > 0 ? (total / annualSreCost).toFixed(1) : "∞";
+        const selfFundWks   = total > 0 ? Math.round((annualSreCost / (total / 52))) : 0;
+        const fmt           = (n: number) => {
+          const v = Math.abs(n) * rate;
+          if (v >= 1_000_000) return `${n < 0 ? "-" : "+"}${sym}${(v / 1_000_000).toFixed(1)}M`;
+          if (v >= 1_000)     return `${n < 0 ? "-" : "+"}${sym}${(v / 1_000).toFixed(0)}K`;
+          return `${n < 0 ? "-" : "+"}${sym}${Math.round(v)}`;
+        };
+        const delivers = [
+          "5+ yrs SRE across 234+ multi-cloud K8s clusters",
+          "GitOps adoption — 468 apps under ArgoCD from day 1",
+          "VPA + HPA rollout framework, ready to deploy",
+          "On-call, runbooks & auto-remediation included",
+          "Savings compound year-over-year, no extra headcount",
+          "Saved CHF 642K+ at my last company over 2 years",
+        ];
+        return (
+          <div className="mt-5 rounded-xl overflow-hidden"
+            style={{ border: "1px solid #7b5ea740" }}>
+            <div className="flex items-center justify-between px-4 py-2.5"
+              style={{ background: "#0a0612", borderBottom: "1px solid #7b5ea720" }}>
+              <span className="text-[13px] font-mono text-purple-400 uppercase tracking-widest">
+                // why hire yaiser?
+              </span>
+              <span className="text-[11px] text-gray-500 font-mono">the business case</span>
+            </div>
+
+            <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-6"
+              style={{ background: "#06040e" }}>
+
+              {/* Left — ROI model */}
+              <div>
+                <p className="text-[11px] text-gray-500 uppercase tracking-widest mb-3">Year-1 financial model</p>
+                <div className="space-y-2">
+                  {[
+                    { label: "Projected savings",       val: fmtBig(total),            color: "#4ade80" },
+                    { label: `Senior SRE cost (~${sym}${Math.round(hourlyRate * rate)}/hr)`, val: `-${sym}${Math.round(annualSreCost * rate / 1000)}K`, color: "#f87171" },
+                    { label: "Net Year-1 value",         val: fmt(netYear1),             color: netYear1 >= 0 ? "#4ade80" : "#f87171" },
+                  ].map(row => (
+                    <div key={row.label} className="flex items-center justify-between px-3 py-2 rounded text-[13px]"
+                      style={{ background: "#0c0918", border: "1px solid #1a1030" }}>
+                      <span className="text-gray-400">{row.label}</span>
+                      <span className="font-bold tabular-nums" style={{ color: row.color }}>{row.val}</span>
+                    </div>
+                  ))}
+                  <div className="flex items-center gap-3 px-3 py-3 rounded mt-1"
+                    style={{ background: "#0f0620", border: "1px solid #7b5ea740" }}>
+                    <div className="flex-1 text-center">
+                      <p className="text-[11px] text-gray-500 mb-0.5">ROI</p>
+                      <p className="text-[26px] font-black" style={{ color: "#c084fc" }}>{roi}×</p>
+                    </div>
+                    <div className="w-px h-10" style={{ background: "#2a1a40" }} />
+                    <div className="flex-1 text-center">
+                      <p className="text-[11px] text-gray-500 mb-0.5">self-funds in</p>
+                      <p className="text-[26px] font-black" style={{ color: "#38bdf8" }}>~{selfFundWks}wk</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right — what you get */}
+              <div>
+                <p className="text-[11px] text-gray-500 uppercase tracking-widest mb-3">What you actually buy</p>
+                <div className="space-y-2 mb-5">
+                  {delivers.map((d, i) => (
+                    <div key={i} className="flex items-start gap-2.5 text-[13px]">
+                      <span style={{ color: "#4ade80", flexShrink: 0, marginTop: "2px" }}>✓</span>
+                      <span className="text-gray-300 leading-snug">{d}</span>
+                    </div>
+                  ))}
+                </div>
+                <a href="https://calendly.com/yaigenes/1-1-connect"
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-[13px] font-bold transition-all hover:brightness-110"
+                  style={{ background: "linear-gradient(135deg, #7b5ea7, #38bdf8)", color: "#fff" }}>
+                  ↗ Book a 30-min intro call
+                </a>
+              </div>
+            </div>
+
+            {/* Tagline */}
+            <div className="px-5 py-4 text-center"
+              style={{ background: "#080410", borderTop: "1px solid #7b5ea720" }}>
+              <p className="text-[12px] text-gray-400 italic leading-relaxed">
+                "Don't hire an SRE to react to incidents.{" "}
+                <span style={{ color: "#c084fc" }}>Hire one to build the systems that prevent them</span>
+                {" "}— and fund their own salary while doing it."
+              </p>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
@@ -957,7 +1057,14 @@ export default function SandboxLab() {
         </p>
       </div>
 
-      {/* Row 1: CI pipeline + K8s pods */}
+      {/* Row 1: cost impact simulator — full width */}
+      <div className="max-w-5xl w-full">
+        <TerminalCard title="cost-impact-calculator" subtitle="interactive · industry benchmarks">
+          <CostSimulator />
+        </TerminalCard>
+      </div>
+
+      {/* Row 2: CI pipeline + K8s explorer */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 max-w-5xl w-full">
         <TerminalCard title="ci-pipeline.yml" subtitle="github-actions">
           <CIPipelineDemo />
@@ -967,17 +1074,10 @@ export default function SandboxLab() {
         </TerminalCard>
       </div>
 
-      {/* Row 2: golden signals */}
+      {/* Row 3: golden signals */}
       <div className="max-w-5xl w-full">
         <TerminalCard title="golden-signals" subtitle="prometheus · grafana">
           <GoldenSignalsDemo />
-        </TerminalCard>
-      </div>
-
-      {/* Row 3: cost impact simulator — full width */}
-      <div className="max-w-5xl w-full">
-        <TerminalCard title="cost-impact-calculator" subtitle="interactive · industry benchmarks">
-          <CostSimulator />
         </TerminalCard>
       </div>
     </section>

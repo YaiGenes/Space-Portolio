@@ -30,7 +30,7 @@ export const translations = {
           tag: "cost \u00b7 model", clusters: "Clusters", monthlyBill: "Monthly Compute Bill (USD)",
           teamSize: "SRE Team Size", hourlyRate: "SRE Hourly Rate (USD)",
           eng: "engineer", engs: "engineers",
-          vpa: "VPA Fleet Rollout", gitops: "GitOps Automation",
+          vpaHpa: "VPA/HPA Implementation", gitops: "GitOps Automation",
           autoRem: "Alerts / Runbooks / Auto-Remediation",
           projected: "Projected Annual Savings", payback: "payback in", weeks: "weeks",
           investment: "vs. 1 SRE-month investment",
@@ -90,7 +90,7 @@ export const translations = {
           tag: "kosten \u00b7 modell", clusters: "Cluster", monthlyBill: "Monatliche Compute-Kosten (USD)",
           teamSize: "SRE-Teamgr\u00f6\u00dfe", hourlyRate: "SRE Stundensatz (USD)",
           eng: "Ingenieur", engs: "Ingenieure",
-          vpa: "VPA Fleet-Rollout", gitops: "GitOps-Automatisierung",
+          vpaHpa: "VPA/HPA-Implementierung", gitops: "GitOps-Automatisierung",
           autoRem: "Alerts / Runbooks / Auto-Remediation",
           projected: "Projizierte Jahreseinsparungen", payback: "Amortisation in", weeks: "Wochen",
           investment: "vs. 1 SRE-Monat Investition",
@@ -150,7 +150,7 @@ export const translations = {
           tag: "co\u00fbt \u00b7 mod\u00e8le", clusters: "Clusters", monthlyBill: "Facture compute mensuelle (USD)",
           teamSize: "Taille de l\u2019\u00e9quipe SRE", hourlyRate: "Taux horaire SRE (USD)",
           eng: "ing\u00e9nieur", engs: "ing\u00e9nieurs",
-          vpa: "D\u00e9ploiement VPA Fleet", gitops: "Automatisation GitOps",
+          vpaHpa: "Impl\u00e9mentation VPA/HPA", gitops: "Automatisation GitOps",
           autoRem: "Alertes / Runbooks / Auto-R\u00e9m\u00e9diation",
           projected: "\u00c9conomies annuelles projet\u00e9es", payback: "retour en", weeks: "semaines",
           investment: "vs. 1 mois-SRE d\u2019investissement",
@@ -200,7 +200,7 @@ export interface T {
       sim: {
         tag: string; clusters: string; monthlyBill: string; teamSize: string; hourlyRate: string;
         eng: string; engs: string;
-        vpa: string; gitops: string; autoRem: string;
+        vpaHpa: string; gitops: string; autoRem: string;
         projected: string; payback: string; weeks: string; investment: string;
         wasteTitle: string; autoCalc: string;
         largeFleet: string; midFleet: string; smallFleet: string; typicalFleet: string;

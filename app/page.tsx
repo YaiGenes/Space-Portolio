@@ -13,9 +13,9 @@ export default function Home() {
         <Hero />
         <About />
         <Experience />
-        <Skills />
-        <Projects />
         <SandboxLab />
+        <Projects />
+        <Skills />
         <Contact />
       </div>
     </main>
