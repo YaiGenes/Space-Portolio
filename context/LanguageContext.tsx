@@ -24,7 +24,22 @@ export const translations = {
       experience: { title: "Work",       accent: "Experience" },
       skills:     "Tools & Technologies",
       projects:   { title: "Flagship",   accent: "Projects" },
-      lab:        { sub: "live SRE demos \u00b7 running in your browser \u00b7 no backend" },
+      lab: {
+        sub: "live SRE demos \u00b7 running in your browser \u00b7 no backend",
+        sim: {
+          tag: "cost \u00b7 model", clusters: "Clusters", monthlyBill: "Monthly Compute Bill (USD)",
+          teamSize: "SRE Team Size", hourlyRate: "SRE Hourly Rate (USD)",
+          eng: "engineer", engs: "engineers",
+          vpa: "VPA Fleet Rollout", gitops: "GitOps Automation",
+          autoRem: "Alerts / Runbooks / Auto-Remediation",
+          projected: "Projected Annual Savings", payback: "payback in", weeks: "weeks",
+          investment: "vs. 1 SRE-month investment",
+          wasteTitle: "Est. Resource Waste", autoCalc: "auto-calculated",
+          largeFleet: "large fleet", midFleet: "mid fleet", smallFleet: "small fleet", typicalFleet: "typical fleet",
+        },
+        ci:   { run: "\u25b6  Run Pipeline",    runAgain: "\u21ba  Run Again",    cancel: "\u25a0  Cancel"     },
+        pods: { kill: "\u2717 Kill Pod",         scaleUp:  "+ Scale Up",            scaleDown: "\u2212 Scale Down" },
+      },
       contact:    { title: "Let\u2019s work", accent: "together" },
     },
     about: {
@@ -41,7 +56,7 @@ export const translations = {
     },
     contact: {
       sub: "Open to new roles, collaborations, or a conversation about SRE, Kubernetes, and infrastructure automation.",
-      email: "Send an Email",
+      email: "Book a Meeting",
       copy: "yaigenes@infrabio.dev",
       copied: "\u2713 Copied to clipboard",
     },
@@ -69,7 +84,22 @@ export const translations = {
       experience: { title: "Berufliche",    accent: "Erfahrung" },
       skills:     "Tools & Technologien",
       projects:   { title: "Wichtigste",    accent: "Projekte" },
-      lab:        { sub: "Live SRE-Demos \u00b7 im Browser \u00b7 kein Backend" },
+      lab: {
+        sub: "Live SRE-Demos \u00b7 im Browser \u00b7 kein Backend",
+        sim: {
+          tag: "kosten \u00b7 modell", clusters: "Cluster", monthlyBill: "Monatliche Compute-Kosten (USD)",
+          teamSize: "SRE-Teamgr\u00f6\u00dfe", hourlyRate: "SRE Stundensatz (USD)",
+          eng: "Ingenieur", engs: "Ingenieure",
+          vpa: "VPA Fleet-Rollout", gitops: "GitOps-Automatisierung",
+          autoRem: "Alerts / Runbooks / Auto-Remediation",
+          projected: "Projizierte Jahreseinsparungen", payback: "Amortisation in", weeks: "Wochen",
+          investment: "vs. 1 SRE-Monat Investition",
+          wasteTitle: "Gesch\u00e4tzte Ressourcenverschwendung", autoCalc: "automatisch berechnet",
+          largeFleet: "gro\u00dfe Flotte", midFleet: "mittlere Flotte", smallFleet: "kleine Flotte", typicalFleet: "typische Flotte",
+        },
+        ci:   { run: "\u25b6  Pipeline starten", runAgain: "\u21ba  Erneut starten", cancel: "\u25a0  Abbrechen"  },
+        pods: { kill: "\u2717 Pod beenden",       scaleUp:  "+ Skalieren \u2191",     scaleDown: "\u2212 Skalieren \u2193" },
+      },
       contact:    { title: "Kontakt", accent: "aufnehmen" },
     },
     about: {
@@ -86,7 +116,7 @@ export const translations = {
     },
     contact: {
       sub: "Offen f\u00fcr neue Stellen, Kooperationen oder ein Gespr\u00e4ch \u00fcber SRE, Kubernetes und Infrastrukturautomatisierung.",
-      email: "E-Mail senden",
+      email: "Meeting buchen",
       copy: "yaigenes@infrabio.dev",
       copied: "\u2713 In Zwischenablage kopiert",
     },
@@ -114,7 +144,22 @@ export const translations = {
       experience: { title: "Exp\u00e9rience", accent: "Professionnelle" },
       skills:     "Outils & Technologies",
       projects:   { title: "Projets",     accent: "Phares" },
-      lab:        { sub: "D\u00e9mos SRE en direct \u00b7 dans votre navigateur \u00b7 sans backend" },
+      lab: {
+        sub: "D\u00e9mos SRE en direct \u00b7 dans votre navigateur \u00b7 sans backend",
+        sim: {
+          tag: "co\u00fbt \u00b7 mod\u00e8le", clusters: "Clusters", monthlyBill: "Facture compute mensuelle (USD)",
+          teamSize: "Taille de l\u2019\u00e9quipe SRE", hourlyRate: "Taux horaire SRE (USD)",
+          eng: "ing\u00e9nieur", engs: "ing\u00e9nieurs",
+          vpa: "D\u00e9ploiement VPA Fleet", gitops: "Automatisation GitOps",
+          autoRem: "Alertes / Runbooks / Auto-R\u00e9m\u00e9diation",
+          projected: "\u00c9conomies annuelles projet\u00e9es", payback: "retour en", weeks: "semaines",
+          investment: "vs. 1 mois-SRE d\u2019investissement",
+          wasteTitle: "Gaspillage estim\u00e9", autoCalc: "calcul\u00e9 automatiquement",
+          largeFleet: "grande flotte", midFleet: "flotte moyenne", smallFleet: "petite flotte", typicalFleet: "flotte typique",
+        },
+        ci:   { run: "\u25b6  Lancer le pipeline", runAgain: "\u21ba  Relancer",      cancel: "\u25a0  Annuler"       },
+        pods: { kill: "\u2717 Tuer le pod",         scaleUp:  "+ Scaler \u2191",        scaleDown: "\u2212 Scaler \u2193" },
+      },
       contact:    { title: "Me", accent: "Contacter" },
     },
     about: {
@@ -131,7 +176,7 @@ export const translations = {
     },
     contact: {
       sub: "Ouvert aux nouvelles opportunit\u00e9s, collaborations, ou pour discuter de SRE, Kubernetes et automatisation d\u2019infrastructure.",
-      email: "Envoyer un e-mail",
+      email: "R\u00e9server une r\u00e9union",
       copy: "yaigenes@infrabio.dev",
       copied: "\u2713 Copi\u00e9 dans le presse-papier",
     },
@@ -150,7 +195,19 @@ export interface T {
     experience: { title: string; accent: string };
     skills: string;
     projects: { title: string; accent: string };
-    lab: { sub: string };
+    lab: {
+      sub: string;
+      sim: {
+        tag: string; clusters: string; monthlyBill: string; teamSize: string; hourlyRate: string;
+        eng: string; engs: string;
+        vpa: string; gitops: string; autoRem: string;
+        projected: string; payback: string; weeks: string; investment: string;
+        wasteTitle: string; autoCalc: string;
+        largeFleet: string; midFleet: string; smallFleet: string; typicalFleet: string;
+      };
+      ci:   { run: string; runAgain: string; cancel: string };
+      pods: { kill: string; scaleUp: string; scaleDown: string };
+    };
     contact: { title: string; accent: string };
   };
   about: { bio1: string; bio2: string; bio3: string };

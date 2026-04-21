@@ -1,5 +1,6 @@
 import Image from "next/image";
 import React from "react";
+import ProjectCardHeader, { type ProjectVariant } from "./ProjectCardHeader";
 
 interface Props {
   company: string;
@@ -17,6 +18,7 @@ interface Props {
   impactLabel?: string;
   githubUrl?: string;
   demoUrl?: string;
+  variant?: ProjectVariant;
 }
 
 const ProjectCard = ({
@@ -35,23 +37,28 @@ const ProjectCard = ({
   impactLabel,
   githubUrl,
   demoUrl,
+  variant,
 }: Props) => {
   return (
     <div className="relative overflow-hidden rounded-lg shadow-lg border border-[#2A0E61] projectCard">
-      <div className="relative w-full h-48 overflow-hidden">
-        <Image
-          src={src}
-          alt={title}
-          fill
-          className="object-cover"
-        />
-      </div>
+      {variant ? (
+        <ProjectCardHeader variant={variant} impactStat={impactStat} impactLabel={impactLabel} />
+      ) : (
+        <div className="relative w-full h-48 overflow-hidden">
+          <Image
+            src={src}
+            alt={title}
+            fill
+            className="object-cover"
+          />
+        </div>
+      )}
 
       <div className="relative p-5">
         <p className="text-xs font-mono text-purple-400 mb-1">{company}</p>
         <h3 className="text-xl font-semibold text-white leading-snug">{title}</h3>
 
-        {impactStat && impactLabel && (
+        {!variant && impactStat && impactLabel && (
           <div className="mt-3 inline-flex flex-col items-center justify-center rounded-lg border border-purple-500/40 bg-purple-950/30 px-4 py-2">
             <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
               {impactStat}

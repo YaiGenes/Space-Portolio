@@ -35,7 +35,9 @@ const Contact = () => {
 
         <div className="flex flex-col gap-4">
           <a
-            href="mailto:yaigenes@infrabio.dev?subject=Hello from your portfolio"
+            href="https://calendly.com/yaigenes/1-1-connect"
+            target="_blank"
+            rel="noopener noreferrer"
             className="w-full py-4 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-600 text-white font-semibold hover:from-purple-500 hover:to-cyan-500 transition-all text-center text-base"
           >
             {t.contact.email}

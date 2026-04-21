@@ -80,13 +80,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${bricolage.variable} ${onest.variable} ${jetbrains.variable} font-body bg-[#030014] overflow-y-scroll overflow-x-hidden`}
+        className={`${bricolage.variable} ${onest.variable} ${jetbrains.variable} font-body bg-[#030014] overflow-y-scroll`}
       >
         <LanguageProvider>
-          <StarsCanvas />
-          <Navbar />
-          {children}
-          <Footer />
+          <div className="overflow-x-hidden">
+            <StarsCanvas />
+            <Navbar />
+            {children}
+            <Footer />
+          </div>
         </LanguageProvider>
       </body>
     </html>

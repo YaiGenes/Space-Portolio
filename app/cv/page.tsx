@@ -24,6 +24,7 @@ export default function CVPage() {
           body, html, main { background: white !important; margin: 0; padding: 0; }
           .cv-outer { box-shadow: none !important; margin: 0 !important; width: 100% !important; }
           [class*="fixed"] { display: none !important; }
+          footer { display: none !important; }
         }
       ` }} />
 

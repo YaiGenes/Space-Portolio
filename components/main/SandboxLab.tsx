@@ -78,6 +78,8 @@ const S_ICON: Record<StepStatus, string> = {
 };
 
 function CIPipelineDemo() {
+  const { t } = useLanguage();
+  const ci = t.sections.lab.ci;
   const [steps, setSteps] = useState<PipelineStep[]>(mkFreshSteps());
   const [pState, setPState] = useState<PipelineState>("idle");
   const [elapsed, setElapsed] = useState(0);
@@ -187,7 +189,7 @@ function CIPipelineDemo() {
             className="px-3 py-1.5 rounded text-[11px] font-mono transition-all hover:brightness-110"
             style={{ background: "#0d1f0d", border: "1px solid #4ade80", color: "#4ade80" }}
           >
-            {pState === "idle" ? "▶  Run Pipeline" : "↺  Run Again"}
+            {pState === "idle" ? ci.run : ci.runAgain}
           </button>
         )}
         {pState === "running" && (
@@ -196,7 +198,7 @@ function CIPipelineDemo() {
             className="px-3 py-1.5 rounded text-[11px] font-mono"
             style={{ background: "#1a0808", border: "1px solid #ef4444", color: "#ef4444" }}
           >
-            ■  Cancel
+            {ci.cancel}
           </button>
         )}
         <a
@@ -212,170 +214,370 @@ function CIPipelineDemo() {
   );
 }
 
-// ─── 2. K8s Pod Simulator ─────────────────────────────────────────────────────
+// ─── 2. K8s Explorer ──────────────────────────────────────────────────────────
 
-type PodStatus = "Running" | "Pending" | "CrashLoopBackOff" | "Terminating";
+type PodStatus = "Running" | "Pending" | "CrashLoopBackOff" | "Terminating" | "OOMKilled";
+type K8sTab   = "pods" | "hpa" | "services" | "events";
 
-interface Pod {
-  id: string;
-  status: PodStatus;
-  restarts: number;
-  age: number;
+interface K8sPod {
+  id: string; deploy: string; status: PodStatus;
+  restarts: number; age: number; cpu: number; mem: number;
+}
+interface K8sEvent {
+  ts: string; kind: "Normal" | "Warning";
+  reason: string; obj: string; message: string;
 }
 
 const POD_COLOR: Record<PodStatus, string> = {
-  Running:          "#4ade80",
-  Pending:          "#f59e0b",
-  CrashLoopBackOff: "#ef4444",
-  Terminating:      "#6b7280",
+  Running: "#4ade80", Pending: "#f59e0b",
+  CrashLoopBackOff: "#ef4444", Terminating: "#6b7280", OOMKilled: "#f97316",
 };
+const SVC_TYPE_COLOR: Record<string, string> = {
+  ClusterIP: "#38bdf8", LoadBalancer: "#4ade80", Ingress: "#c084fc",
+};
+const SERVICES = [
+  { name: "web-app-svc", type: "ClusterIP",    ip: "10.96.43.12",  ext: "<none>",       port: "80/TCP",   age: "3d5h" },
+  { name: "web-app-lb",  type: "LoadBalancer", ip: "10.96.15.88",  ext: "203.0.113.42", port: "443/TCP",  age: "3d5h" },
+  { name: "metrics-svc", type: "ClusterIP",    ip: "10.96.77.99",  ext: "<none>",       port: "9090/TCP", age: "7d2h" },
+  { name: "argocd-svc",  type: "ClusterIP",    ip: "10.96.201.55", ext: "<none>",       port: "8080/TCP", age: "14d"  },
+];
 
-function fmtAge(s: number) {
-  if (s < 60)   return `${s}s`;
-  if (s < 3600) return `${Math.floor(s / 60)}m`;
-  return `${Math.floor(s / 3600)}h${Math.floor((s % 3600) / 60)}m`;
+function fmtAge(secs: number) {
+  if (secs < 60)   return `${secs}s`;
+  if (secs < 3600) return `${Math.floor(secs / 60)}m`;
+  return `${Math.floor(secs / 3600)}h${Math.floor((secs % 3600) / 60)}m`;
 }
 
-let _podId = 3;
+const INIT_PODS: K8sPod[] = [
+  { id: "web-app-0", deploy: "web-app",  status: "Running", restarts: 0, age: 8432,  cpu: 45,  mem: 128 },
+  { id: "web-app-1", deploy: "web-app",  status: "Running", restarts: 0, age: 5217,  cpu: 52,  mem: 142 },
+  { id: "web-app-2", deploy: "web-app",  status: "Running", restarts: 1, age: 3044,  cpu: 38,  mem: 117 },
+  { id: "metrics-0", deploy: "metrics",  status: "Running", restarts: 0, age: 72800, cpu: 12,  mem: 256 },
+];
+const INIT_EVENTS: K8sEvent[] = [
+  { ts: "2m ago", kind: "Normal",  reason: "Pulled",     obj: "pod/web-app-2",     message: "Successfully pulled image web-app:v1.4.2" },
+  { ts: "3m ago", kind: "Normal",  reason: "Started",    obj: "pod/web-app-2",     message: "Started container web-app" },
+  { ts: "3m ago", kind: "Warning", reason: "BackOff",    obj: "pod/web-app-2",     message: "Back-off restarting failed container" },
+  { ts: "4m ago", kind: "Warning", reason: "OOMKilling", obj: "pod/web-app-2",     message: "Memory limit reached, container OOM killed" },
+  { ts: "6m ago", kind: "Normal",  reason: "Sync",       obj: "app/web-app",       message: "Successfully synced (all tasks run)" },
+  { ts: "9m ago", kind: "Normal",  reason: "ScalingReplicaSet", obj: "deploy/web-app", message: "Scaled up replica set web-app to 3" },
+];
 
-function K8sPodsDemo() {
-  const [pods, setPods] = useState<Pod[]>([
-    { id: "web-app-0", status: "Running", restarts: 0, age: 8432 },
-    { id: "web-app-1", status: "Running", restarts: 0, age: 5217 },
-    { id: "web-app-2", status: "Running", restarts: 1, age: 3044 },
-  ]);
-  const [log, setLog] = useState<string[]>([]);
-  const addLog = (msg: string) =>
-    setLog(p => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...p].slice(0, 4));
+function K8sExplorer() {
+  const { t } = useLanguage();
+  const pt = t.sections.lab.pods;
 
+  const podIdRef    = useRef(4);
+  const epochRef    = useRef(0);
+  const spikeEpoch  = useRef(0);
+
+  const [activeTab,    setActiveTab]    = useState<K8sTab>("pods");
+  const [pods,         setPods]         = useState<K8sPod[]>(INIT_PODS);
+  const [events,       setEvents]       = useState<K8sEvent[]>(INIT_EVENTS);
+  const [cpuUsage,     setCpuUsage]     = useState(38);
+  const [hpaReplicas,  setHpaReplicas]  = useState(3);
+  const [spiking,      setSpiking]      = useState(false);
+
+  // Age + CPU fluctuation ticker — named `ticker` to avoid shadowing `t` from useLanguage
   useEffect(() => {
-    const t = setInterval(() => {
+    const ticker = setInterval(() => {
       setPods(p => p.map(pod =>
         pod.status === "Running" || pod.status === "Pending"
-          ? { ...pod, age: pod.age + 1 } : pod
+          ? { ...pod, age: pod.age + 1, cpu: Math.max(5, Math.min(95, pod.cpu + (Math.random() - 0.5) * 5)) }
+          : pod
       ));
+      setCpuUsage(p => Math.max(8, Math.min(95, p + (Math.random() - 0.48) * 3)));
     }, 1000);
-    return () => clearInterval(t);
+    return () => clearInterval(ticker);
   }, []);
 
+  const pushEvent = (kind: "Normal" | "Warning", reason: string, obj: string, message: string) =>
+    setEvents(p => [{ ts: new Date().toLocaleTimeString(), kind, reason, obj, message }, ...p].slice(0, 14));
+
+  // ── Pod actions ──────────────────────────────────────────────────────────────
   const killPod = () => {
-    const running = pods.filter(p => p.status === "Running");
-    if (!running.length) return;
-    const target = running[Math.floor(Math.random() * running.length)];
-    addLog(`OOM killed → ${target.id}`);
-    setPods(p => p.map(pod => pod.id === target.id
-      ? { ...pod, status: "CrashLoopBackOff", restarts: pod.restarts + 1 } : pod));
-    setTimeout(() => setPods(p => p.map(pod => pod.id === target.id
-      ? { ...pod, status: "Terminating" } : pod)), 2000);
-    setTimeout(() => setPods(p => p.map(pod => pod.id === target.id
-      ? { ...pod, status: "Pending", age: 0 } : pod)), 3300);
+    const candidates = pods.filter(p => p.status === "Running" && p.deploy === "web-app");
+    if (!candidates.length) return;
+    const epoch  = ++epochRef.current;
+    const target = candidates[Math.floor(Math.random() * candidates.length)];
+    pushEvent("Warning", "OOMKilling", `pod/${target.id}`, "Memory limit exceeded, container OOM killed");
+    setPods(p => p.map(pod => pod.id === target.id ? { ...pod, status: "OOMKilled", restarts: pod.restarts + 1 } : pod));
     setTimeout(() => {
-      addLog(`${target.id} recovered ✓`);
-      setPods(p => p.map(pod => pod.id === target.id
-        ? { ...pod, status: "Running" } : pod));
-    }, 4800);
+      if (epochRef.current !== epoch) return;
+      pushEvent("Warning", "BackOff", `pod/${target.id}`, "Back-off restarting failed container");
+      setPods(p => p.map(pod => pod.id === target.id ? { ...pod, status: "CrashLoopBackOff" } : pod));
+    }, 900);
+    setTimeout(() => {
+      if (epochRef.current !== epoch) return;
+      setPods(p => p.map(pod => pod.id === target.id ? { ...pod, status: "Terminating" } : pod));
+    }, 2100);
+    setTimeout(() => {
+      if (epochRef.current !== epoch) return;
+      pushEvent("Normal", "Scheduled", `pod/${target.id}`, `Assigned default/${target.id} to node-02`);
+      setPods(p => p.map(pod => pod.id === target.id ? { ...pod, status: "Pending", age: 0, cpu: 0 } : pod));
+    }, 3400);
+    setTimeout(() => {
+      if (epochRef.current !== epoch) return;
+      pushEvent("Normal", "Started", `pod/${target.id}`, "Started container web-app");
+      setPods(p => p.map(pod => pod.id === target.id ? { ...pod, status: "Running", cpu: 33, mem: 120 } : pod));
+    }, 5000);
   };
 
   const scaleUp = () => {
-    if (pods.length >= 6) return;
-    const newId = `web-app-${_podId++}`;
-    addLog(`Scheduled → ${newId}`);
-    setPods(p => [...p, { id: newId, status: "Pending", restarts: 0, age: 0 }]);
-    setTimeout(() => setPods(p => p.map(pod => pod.id === newId
-      ? { ...pod, status: "Running" } : pod)), 1600);
+    const webPods = pods.filter(p => p.deploy === "web-app");
+    if (webPods.length >= 6) return;
+    const newId = `web-app-${podIdRef.current++}`;
+    pushEvent("Normal", "ScalingReplicaSet", "deploy/web-app", `Scaled up replica set web-app to ${webPods.length + 1}`);
+    setHpaReplicas(n => n + 1);
+    setPods(p => [...p, { id: newId, deploy: "web-app", status: "Pending", restarts: 0, age: 0, cpu: 0, mem: 0 }]);
+    const ep = epochRef.current;
+    setTimeout(() => {
+      if (epochRef.current !== ep) return;
+      pushEvent("Normal", "Started", `pod/${newId}`, "Started container web-app");
+      setPods(p => p.map(pod => pod.id === newId ? { ...pod, status: "Running", cpu: 30, mem: 115 } : pod));
+    }, 1600);
   };
 
   const scaleDown = () => {
-    const running = pods.filter(p => p.status === "Running");
+    const running = pods.filter(p => p.status === "Running" && p.deploy === "web-app");
     if (running.length <= 1) return;
     const target = running[running.length - 1];
-    addLog(`Terminating → ${target.id}`);
+    pushEvent("Normal", "ScalingReplicaSet", "deploy/web-app", `Scaled down replica set web-app to ${running.length - 1}`);
+    setHpaReplicas(n => Math.max(1, n - 1));
     setPods(p => p.map(pod => pod.id === target.id ? { ...pod, status: "Terminating" } : pod));
     setTimeout(() => setPods(p => p.filter(pod => pod.id !== target.id)), 1200);
   };
 
-  const runningCount = pods.filter(p => p.status === "Running").length;
+  // ── HPA spike ────────────────────────────────────────────────────────────────
+  const spikeCpu = () => {
+    if (spiking) return;
+    setSpiking(true);
+    const epoch = ++spikeEpoch.current;
+    const id1 = `web-app-${podIdRef.current++}`;
+    const id2 = `web-app-${podIdRef.current++}`;
+    pushEvent("Warning", "TargetValueAboveThreshold", "hpa/web-app", "CPU 89% > target 70%");
+    setCpuUsage(89);
+    setTimeout(() => {
+      if (spikeEpoch.current !== epoch) return;
+      pushEvent("Normal", "SuccessfulRescale", "hpa/web-app", "Scaled up: 3 → 5 replicas (cpu above target)");
+      setHpaReplicas(5);
+      setPods(p => [
+        ...p,
+        { id: id1, deploy: "web-app", status: "Pending", restarts: 0, age: 0, cpu: 0, mem: 0 },
+        { id: id2, deploy: "web-app", status: "Pending", restarts: 0, age: 0, cpu: 0, mem: 0 },
+      ]);
+      setTimeout(() => {
+        if (spikeEpoch.current !== epoch) return;
+        setPods(p => p.map(pod => (pod.id === id1 || pod.id === id2) ? { ...pod, status: "Running", cpu: 38, mem: 115 } : pod));
+        setCpuUsage(36);
+        setTimeout(() => {
+          if (spikeEpoch.current !== epoch) return;
+          pushEvent("Normal", "SuccessfulRescale", "hpa/web-app", "Scaled down: 5 → 3 replicas (all metrics below target)");
+          setHpaReplicas(3);
+          setSpiking(false);
+          setPods(p => p.map(pod => (pod.id === id1 || pod.id === id2) ? { ...pod, status: "Terminating" } : pod));
+          setTimeout(() => setPods(p => p.filter(pod => pod.id !== id1 && pod.id !== id2)), 1200);
+        }, 5000);
+      }, 2000);
+    }, 2000);
+  };
+
+  // ── Derived ──────────────────────────────────────────────────────────────────
+  const webPods    = pods.filter(p => p.deploy === "web-app");
+  const webRunning = webPods.filter(p => p.status === "Running").length;
+  const totalRunning = pods.filter(p => p.status === "Running").length;
+
+  const TABS: { id: K8sTab; label: string }[] = [
+    { id: "pods",     label: "pods"   },
+    { id: "hpa",      label: "hpa"    },
+    { id: "services", label: "svc"    },
+    { id: "events",   label: "events" },
+  ];
 
   return (
     <div className="font-mono">
-      <div className="flex items-center justify-between mb-3">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <span className="text-[10px] px-2 py-0.5 rounded"
             style={{ background: "#0a1525", border: "1px solid #38bdf833", color: "#38bdf8" }}>
             ns/default
           </span>
-          <span className="text-gray-600 text-[10px]">Deployment/web-app</span>
+          <span className="text-gray-600 text-[10px]">{totalRunning}/{pods.length} Running</span>
         </div>
-        <span className="text-[10px]">
-          <span style={{ color: runningCount === pods.length ? "#4ade80" : "#f59e0b" }}>
-            {runningCount}
-          </span>
-          <span className="text-gray-600">/{pods.length} ready</span>
-        </span>
-      </div>
-
-      <div className="space-y-1.5 mb-3">
-        <AnimatePresence>
-          {pods.map(pod => (
-            <motion.div
-              key={pod.id}
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: pod.status === "Terminating" ? 0.4 : 1, y: 0 }}
-              exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-              transition={{ duration: 0.25 }}
-              className="flex items-center gap-2.5 px-2.5 py-1.5 rounded text-[11px]"
+        <div className="flex items-center gap-1">
+          {TABS.map(tb => (
+            <button key={tb.id} onClick={() => setActiveTab(tb.id)}
+              className="text-[10px] px-2 py-0.5 rounded transition-colors"
               style={{
-                background: "#0a0a0a",
-                borderLeft: `2px solid ${POD_COLOR[pod.status]}`,
-              }}
-            >
-              <span
-                style={{ color: POD_COLOR[pod.status] }}
-                className={pod.status === "CrashLoopBackOff" ? "animate-pulse" : ""}
-              >●</span>
-              <span className="text-gray-300 flex-1">{pod.id}</span>
-              <span className="text-[10px] px-1.5 py-0.5 rounded"
-                style={{ color: POD_COLOR[pod.status], background: `${POD_COLOR[pod.status]}18` }}>
-                {pod.status}
-              </span>
-              <span className="text-gray-600 w-12 text-right text-[10px]">{fmtAge(pod.age)}</span>
-              {pod.restarts > 0 && (
-                <span className="text-orange-400 text-[10px] w-6 text-right">{pod.restarts}R</span>
-              )}
-            </motion.div>
+                background: tb.id === activeTab ? "#0a1520" : "transparent",
+                border:     `1px solid ${tb.id === activeTab ? "#38bdf850" : "#1c2a2a"}`,
+                color:      tb.id === activeTab ? "#38bdf8" : "#4b5563",
+              }}>
+              {tb.label}
+            </button>
           ))}
-        </AnimatePresence>
+        </div>
       </div>
 
-      {log.length > 0 && (
-        <div className="mb-3 px-3 py-2 rounded text-[10px] space-y-0.5"
-          style={{ background: "#080b08", border: "1px solid #1a2a1a" }}>
-          {log.map((l, i) => (
-            <div key={i} className="text-gray-600">{l}</div>
-          ))}
+      {/* ── Pods ── */}
+      {activeTab === "pods" && (
+        <div>
+          <div className="space-y-1 mb-3">
+            <AnimatePresence>
+              {pods.map(pod => (
+                <motion.div key={pod.id}
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: pod.status === "Terminating" ? 0.4 : 1, y: 0 }}
+                  exit={{ opacity: 0, height: 0, margin: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex items-center gap-2 px-2.5 py-1.5 rounded text-[11px]"
+                  style={{ background: "#0a0a0a", borderLeft: `2px solid ${POD_COLOR[pod.status]}` }}>
+                  <span style={{ color: POD_COLOR[pod.status] }}
+                    className={["CrashLoopBackOff","OOMKilled"].includes(pod.status) ? "animate-pulse" : ""}>●</span>
+                  <span className="text-gray-300 flex-1 min-w-0 truncate">{pod.id}</span>
+                  <span className="text-[9px] px-1.5 py-0.5 rounded flex-shrink-0"
+                    style={{ color: POD_COLOR[pod.status], background: `${POD_COLOR[pod.status]}15` }}>
+                    {pod.status}
+                  </span>
+                  {pod.status === "Running" && (
+                    <span className="text-gray-600 text-[9px] w-14 text-right flex-shrink-0">
+                      {Math.round(pod.cpu)}m CPU
+                    </span>
+                  )}
+                  <span className="text-gray-700 text-[9px] w-10 text-right flex-shrink-0">{fmtAge(pod.age)}</span>
+                  {pod.restarts > 0 && <span className="text-orange-400 text-[9px] flex-shrink-0">{pod.restarts}R</span>}
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            <button onClick={killPod} disabled={webRunning === 0}
+              className="px-3 py-1.5 rounded text-[11px] transition-all hover:brightness-110 disabled:opacity-25"
+              style={{ background: "#1a0808", border: "1px solid #ef4444", color: "#ef4444" }}>
+              {pt.kill}
+            </button>
+            <button onClick={scaleUp} disabled={webPods.length >= 6}
+              className="px-3 py-1.5 rounded text-[11px] transition-all hover:brightness-110 disabled:opacity-25"
+              style={{ background: "#0a150a", border: "1px solid #4ade80", color: "#4ade80" }}>
+              {pt.scaleUp}
+            </button>
+            <button onClick={scaleDown} disabled={webRunning <= 1}
+              className="px-3 py-1.5 rounded text-[11px] transition-all hover:brightness-110 disabled:opacity-25"
+              style={{ background: "#111", border: "1px solid #4b5563", color: "#9ca3af" }}>
+              {pt.scaleDown}
+            </button>
+          </div>
         </div>
       )}
 
-      <div className="flex gap-2 flex-wrap">
-        <button onClick={killPod}
-          disabled={runningCount === 0}
-          className="px-3 py-1.5 rounded text-[11px] font-mono transition-all hover:brightness-110 disabled:opacity-25"
-          style={{ background: "#1a0808", border: "1px solid #ef4444", color: "#ef4444" }}>
-          ✗ Kill Pod
-        </button>
-        <button onClick={scaleUp}
-          disabled={pods.length >= 6}
-          className="px-3 py-1.5 rounded text-[11px] font-mono transition-all hover:brightness-110 disabled:opacity-25"
-          style={{ background: "#0a150a", border: "1px solid #4ade80", color: "#4ade80" }}>
-          + Scale Up
-        </button>
-        <button onClick={scaleDown}
-          disabled={runningCount <= 1}
-          className="px-3 py-1.5 rounded text-[11px] font-mono transition-all hover:brightness-110 disabled:opacity-25"
-          style={{ background: "#111", border: "1px solid #4b5563", color: "#9ca3af" }}>
-          − Scale Down
-        </button>
-      </div>
+      {/* ── HPA ── */}
+      {activeTab === "hpa" && (
+        <div>
+          <div className="px-3 py-2.5 rounded mb-3" style={{ background: "#0a0a0a", border: "1px solid #1a2a1a" }}>
+            <div className="flex items-center justify-between mb-2 text-[10px]">
+              <div>
+                <span className="text-gray-200">hpa/web-app</span>
+                <span className="text-gray-600 ml-2">→ Deployment/web-app</span>
+              </div>
+              <div className="flex gap-3">
+                <span className="text-gray-600">min <span className="text-gray-400">2</span></span>
+                <span className="text-gray-600">max <span className="text-gray-400">8</span></span>
+                <span className="text-gray-600">replicas <span style={{ color: "#4ade80" }}>{hpaReplicas}</span></span>
+              </div>
+            </div>
+            <div className="text-[9px] text-gray-600 flex justify-between mb-1">
+              <span>CPU utilization</span>
+              <span style={{ color: cpuUsage > 70 ? "#ef4444" : cpuUsage > 50 ? "#f59e0b" : "#4ade80" }}>
+                {Math.round(cpuUsage)}% / 70% target
+              </span>
+            </div>
+            <div className="relative h-2 rounded-full overflow-hidden" style={{ background: "#1a1a1a" }}>
+              <div className="h-full rounded-full transition-all duration-700"
+                style={{
+                  width: `${Math.min(100, cpuUsage)}%`,
+                  background: cpuUsage > 70 ? "#ef4444" : cpuUsage > 50 ? "#f59e0b" : "#4ade80",
+                }} />
+              {/* Target line at 70% */}
+              <div className="absolute top-0 bottom-0 w-px bg-gray-500 opacity-60" style={{ left: "70%" }} />
+            </div>
+          </div>
+          {/* Replica dots */}
+          <div className="flex items-center gap-1.5 mb-4 flex-wrap">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i}
+                className="w-7 h-7 rounded flex items-center justify-center text-[10px] transition-all duration-500"
+                style={{
+                  background: i < hpaReplicas ? "#0d1f0d" : "#0c0c0c",
+                  border: `1px solid ${i < hpaReplicas ? "#4ade8060" : "#1a2a1a"}`,
+                  color: i < hpaReplicas ? "#4ade80" : "#374151",
+                }}>
+                {i < hpaReplicas ? "●" : "○"}
+              </div>
+            ))}
+            <span className="text-[9px] text-gray-600 ml-1">{hpaReplicas}/8</span>
+          </div>
+          <button onClick={spikeCpu} disabled={spiking}
+            className="px-3 py-1.5 rounded text-[11px] transition-all hover:brightness-110 disabled:opacity-30"
+            style={{ background: "#1a0a00", border: "1px solid #f97316", color: "#f97316" }}>
+            {spiking ? "⟳  Scaling in progress..." : "⚡  Spike CPU → watch HPA scale"}
+          </button>
+        </div>
+      )}
+
+      {/* ── Services ── */}
+      {activeTab === "services" && (
+        <div className="space-y-1">
+          <div className="grid gap-x-2 px-2 py-1 text-[9px] text-gray-600 uppercase tracking-wider border-b"
+            style={{ gridTemplateColumns: "1fr auto auto auto", borderColor: "#1a2a1a" }}>
+            <span>NAME</span><span>TYPE</span><span>CLUSTER-IP</span><span>PORT</span>
+          </div>
+          {SERVICES.map(svc => (
+            <div key={svc.name}
+              className="grid items-center gap-x-2 px-2.5 py-1.5 rounded text-[11px]"
+              style={{ gridTemplateColumns: "1fr auto auto auto", background: "#0a0a0a", borderLeft: `2px solid ${SVC_TYPE_COLOR[svc.type]}` }}>
+              <span className="text-gray-300 truncate">{svc.name}</span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded"
+                style={{ color: SVC_TYPE_COLOR[svc.type], background: `${SVC_TYPE_COLOR[svc.type]}15` }}>
+                {svc.type}
+              </span>
+              <span className="text-gray-600 text-[9px] tabular-nums">{svc.ip}</span>
+              <span className="text-gray-500 text-[9px]">{svc.port}</span>
+            </div>
+          ))}
+          <div className="px-2.5 py-1.5 rounded text-[11px]"
+            style={{ background: "#0a0a0a", borderLeft: "2px solid #c084fc" }}>
+            <div className="flex items-center justify-between mb-0.5">
+              <span className="text-gray-300">ingress/web-app-ingress</span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ color: "#c084fc", background: "#c084fc15" }}>Ingress</span>
+            </div>
+            <p className="text-[9px] text-gray-600">web-app.example.com → web-app-svc:80 (TLS)</p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Events ── */}
+      {activeTab === "events" && (
+        <div className="space-y-1 overflow-y-auto" style={{ maxHeight: 210 }}>
+          {events.map((ev, i) => (
+            <div key={i} className="flex items-start gap-2 px-2.5 py-1.5 rounded text-[10px]"
+              style={{ background: "#0a0a0a", borderLeft: `2px solid ${ev.kind === "Warning" ? "#f59e0b" : "#4ade80"}` }}>
+              <span className="flex-shrink-0 mt-px"
+                style={{ color: ev.kind === "Warning" ? "#f59e0b" : "#4ade80" }}>
+                {ev.kind === "Warning" ? "⚠" : "✓"}
+              </span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-gray-200 font-bold">{ev.reason}</span>
+                  <span className="text-gray-600 text-[9px] truncate">{ev.obj}</span>
+                  <span className="text-gray-700 text-[9px] ml-auto flex-shrink-0">{ev.ts}</span>
+                </div>
+                <p className="text-gray-600 text-[9px] mt-0.5 truncate">{ev.message}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -525,6 +727,215 @@ function GoldenSignalsDemo() {
   );
 }
 
+// ─── 4. Cost Impact Simulator ─────────────────────────────────────────────────
+
+function SliderRow({
+  label, value, min, max, step, display, onChange, color,
+}: {
+  label: string; value: number; min: number; max: number; step: number;
+  display: string; onChange: (v: number) => void; color: string;
+}) {
+  const pct = ((value - min) / (max - min)) * 100;
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1.5">
+        <span className="text-[10px] text-gray-500 uppercase tracking-wider">{label}</span>
+        <span className="text-[11px] font-bold" style={{ color }}>{display}</span>
+      </div>
+      <input
+        type="range" min={min} max={max} step={step} value={value}
+        onChange={e => onChange(Number(e.target.value))}
+        className="w-full h-[3px] rounded-full appearance-none cursor-pointer"
+        style={{
+          background: `linear-gradient(to right, ${color}90 ${pct}%, #1c2a1c ${pct}%)`,
+          accentColor: color,
+        }}
+      />
+    </div>
+  );
+}
+
+function SavingsBar({
+  label, sub, value, maxValue, color, sym,
+}: {
+  label: string; sub: string; value: number; maxValue: number; color: string; sym: string;
+}) {
+  const pct = maxValue > 0 ? Math.min(100, (value / maxValue) * 100) : 0;
+  const fmt = (n: number) => {
+    if (n >= 1_000_000) return `${sym}${(n / 1_000_000).toFixed(2)}M`;
+    if (n >= 1_000) return `${sym}${(n / 1_000).toFixed(0)}K`;
+    return `${sym}${n}`;
+  };
+  return (
+    <div className="px-3 py-2.5 rounded" style={{ background: "#070c07", border: `1px solid ${color}18` }}>
+      <div className="flex items-start justify-between gap-3 mb-2">
+        <div>
+          <p className="text-[11px] text-gray-300">{label}</p>
+          <p className="text-[9px] text-gray-700 mt-0.5 leading-relaxed">{sub}</p>
+        </div>
+        <span className="text-[13px] font-bold flex-shrink-0" style={{ color }}>+{fmt(value)}/yr</span>
+      </div>
+      <div className="h-[3px] rounded-full overflow-hidden" style={{ background: "#1a2a1a" }}>
+        <div
+          className="h-full rounded-full transition-all duration-500"
+          style={{ width: `${pct}%`, background: `linear-gradient(to right, ${color}80, ${color})` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+// Auto-derives estimated resource waste from fleet size using industry benchmarks.
+// Sources: CAST AI 2024 (99.94% of clusters over-provisioned across 2,100+ orgs),
+//          Datadog State of Containers 2024 (83% of container costs from idle resources),
+//          Kubecost community data (35-50% addressable waste baseline).
+// Larger fleets are adjusted down: teams managing 50+ clusters are more likely to have
+// adopted FinOps practices (Kubecost, CAST AI, OpenCost) which reduce addressable waste.
+function estimateWaste(clusters: number): number {
+  const base        = 40; // CAST AI / Datadog / Kubecost consensus
+  const maturityAdj = clusters >= 200 ? -8 : clusters >= 100 ? -5 : clusters >= 50 ? -2 : clusters < 15 ? +6 : 0;
+  return Math.max(25, Math.min(55, base + maturityAdj));
+}
+
+function WasteBadge({ wastePct, clusters, s }: {
+  wastePct: number; clusters: number;
+  s: { wasteTitle: string; autoCalc: string; largeFleet: string; midFleet: string; smallFleet: string; typicalFleet: string };
+}) {
+  const tier =
+    clusters >= 200 ? s.largeFleet :
+    clusters >= 50  ? s.midFleet   :
+    clusters < 15   ? s.smallFleet : s.typicalFleet;
+  return (
+    <div className="px-3 py-2.5 rounded flex items-start justify-between gap-3"
+      style={{ background: "#100d00", border: "1px solid #f59e0b22" }}>
+      <div>
+        <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-0.5">{s.wasteTitle}</p>
+        <p className="text-[9px] text-gray-700 leading-relaxed">
+          {tier} · CAST AI: 99.94% over-provisioned · Datadog 2024: 83% idle · Kubecost: 35–50% baseline
+        </p>
+      </div>
+      <div className="flex-shrink-0 text-right">
+        <p className="text-[22px] font-black leading-none" style={{ color: "#f59e0b" }}>{wastePct}%</p>
+        <p className="text-[9px] text-gray-600 mt-0.5">{s.autoCalc}</p>
+      </div>
+    </div>
+  );
+}
+
+type Currency = "USD" | "EUR" | "CHF";
+const FX: Record<Currency, { rate: number; sym: string }> = {
+  USD: { rate: 1.00,  sym: "$"   },
+  EUR: { rate: 0.92,  sym: "€"   },
+  CHF: { rate: 0.91,  sym: "Fr." },
+};
+
+function CostSimulator() {
+  const { t } = useLanguage();
+  const s = t.sections.lab.sim;
+  const [clusters,    setClusters]    = useState(234);
+  const [monthlyBill, setMonthlyBill] = useState(70000);
+  const [hourlyRate,  setHourlyRate]  = useState(100);
+  const [sreCount,    setSreCount]    = useState(3);
+  const [currency,    setCurrency]    = useState<Currency>("USD");
+
+  const { rate, sym } = FX[currency];
+
+  // Waste derived from fleet size via industry benchmarks (not a user-controlled slider)
+  const wastePct = estimateWaste(clusters);
+
+  // All savings calculated in USD, converted to selected currency for display
+  const vpaSavings     = Math.round(monthlyBill * 0.259 * 12);
+  const gitopsSavings  = Math.round((clusters / 200) * 30 * sreCount * 12 * hourlyRate);
+  const autoRemSavings = Math.round(clusters * 0.05 * (35 / 60) * hourlyRate * 12);
+  const total          = vpaSavings + gitopsSavings + autoRemSavings;
+  const maxSav         = Math.max(vpaSavings, gitopsSavings, autoRemSavings, 1);
+
+  const investment = 160 * hourlyRate;
+  const paybackWks = total > 0 ? (investment / (total / 52)).toFixed(1) : "∞";
+
+  const fmtBig = (n: number) => {
+    const v = n * rate;
+    if (v >= 1_000_000) return `${sym}${(v / 1_000_000).toFixed(2)}M`;
+    if (v >= 1_000) return `${sym}${(v / 1_000).toFixed(0)}K`;
+    return `${sym}${Math.round(v)}`;
+  };
+
+  return (
+    <div className="font-mono">
+      <div className="flex items-center justify-between mb-5">
+        <span className="text-[10px] px-2 py-0.5 rounded"
+          style={{ background: "#071407", border: "1px solid #4ade8033", color: "#4ade80" }}>
+          {s.tag}
+        </span>
+        <div className="flex items-center gap-1">
+          {(["USD", "EUR", "CHF"] as Currency[]).map(c => (
+            <button key={c} onClick={() => setCurrency(c)}
+              className="text-[10px] px-2 py-0.5 rounded transition-colors font-mono"
+              style={{
+                background: currency === c ? "#0a1520" : "transparent",
+                border:     `1px solid ${currency === c ? "#38bdf850" : "#1c2a2a"}`,
+                color:      currency === c ? "#38bdf8" : "#4b5563",
+              }}>
+              {c}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Sliders */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mb-4">
+        <SliderRow label={s.clusters} value={clusters} min={10} max={500} step={5}
+          display={clusters.toString()} onChange={setClusters} color="#38bdf8" />
+        <SliderRow label={`${s.monthlyBill} (${currency})`} value={monthlyBill} min={5000} max={200000} step={1000}
+          display={`${sym}${(monthlyBill * rate / 1000).toFixed(0)}K`} onChange={setMonthlyBill} color="#4ade80" />
+        <SliderRow label={s.teamSize} value={sreCount} min={1} max={20} step={1}
+          display={`${sreCount} ${sreCount > 1 ? s.engs : s.eng}`} onChange={setSreCount} color="#f87171" />
+        <SliderRow label={`${s.hourlyRate} (${currency})`} value={hourlyRate} min={60} max={200} step={5}
+          display={`${sym}${Math.round(hourlyRate * rate)}/hr`} onChange={setHourlyRate} color="#c084fc" />
+      </div>
+
+      {/* Auto-calculated waste badge — full width */}
+      <div className="mb-5">
+        <WasteBadge wastePct={wastePct} clusters={clusters} s={s} />
+      </div>
+
+      {/* Breakdown */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
+        <SavingsBar label={s.vpa}
+          sub={`25.9% of ${sym}${(monthlyBill * rate / 1000).toFixed(0)}K/mo`}
+          value={vpaSavings * rate} maxValue={maxSav * rate} color="#4ade80" sym={sym} />
+        <SavingsBar label={s.gitops}
+          sub={`${sreCount} SRE${sreCount > 1 ? "s" : ""} × 30 hrs/release × 12 · ${clusters} clusters`}
+          value={gitopsSavings * rate} maxValue={maxSav * rate} color="#38bdf8" sym={sym} />
+        <SavingsBar label={s.autoRem}
+          sub={`5% auto-resolved/mo · 35 min · ${clusters} clusters`}
+          value={autoRemSavings * rate} maxValue={maxSav * rate} color="#c084fc" sym={sym} />
+      </div>
+
+      {/* Total */}
+      <div className="px-4 py-4 rounded flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+        style={{ background: "#060f06", border: "1px solid #4ade8025" }}>
+        <div>
+          <p className="text-[10px] text-gray-600 uppercase tracking-widest mb-0.5">{s.projected}</p>
+          <span className="text-[32px] font-black leading-none" style={{ color: "#4ade80", textShadow: "0 0 24px #4ade8050" }}>
+            {fmtBig(total)}
+          </span>
+        </div>
+        <div className="text-right">
+          <p className="text-[9px] text-gray-700 mb-0.5">
+            {s.investment} ({sym}{Math.round(investment * rate / 1000)}K)
+          </p>
+          <p className="text-[13px] font-bold"
+            style={{ color: Number(paybackWks) <= 8 ? "#4ade80" : "#f59e0b" }}>
+            {s.payback} ~{paybackWks} {s.weeks}
+          </p>
+          <p className="text-[9px] text-gray-700 mt-1">CAST AI · Datadog · Kubecost benchmarks</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Section ──────────────────────────────────────────────────────────────────
 
 export default function SandboxLab() {
@@ -546,18 +957,27 @@ export default function SandboxLab() {
         </p>
       </div>
 
+      {/* Row 1: CI pipeline + K8s pods */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 max-w-5xl w-full">
         <TerminalCard title="ci-pipeline.yml" subtitle="github-actions">
           <CIPipelineDemo />
         </TerminalCard>
-        <TerminalCard title="kubectl get pods" subtitle="kubernetes">
-          <K8sPodsDemo />
+        <TerminalCard title="kubectl get all" subtitle="kubernetes">
+          <K8sExplorer />
         </TerminalCard>
       </div>
 
+      {/* Row 2: golden signals */}
       <div className="max-w-5xl w-full">
         <TerminalCard title="golden-signals" subtitle="prometheus · grafana">
           <GoldenSignalsDemo />
+        </TerminalCard>
+      </div>
+
+      {/* Row 3: cost impact simulator — full width */}
+      <div className="max-w-5xl w-full">
+        <TerminalCard title="cost-impact-calculator" subtitle="interactive · industry benchmarks">
+          <CostSimulator />
         </TerminalCard>
       </div>
     </section>

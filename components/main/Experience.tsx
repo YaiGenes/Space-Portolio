@@ -5,6 +5,19 @@ import { motion } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
 import { experiences } from "@/constants/content";
 
+function renderHighlight(text: string) {
+  const marker = "CHF 642K+";
+  const idx = text.indexOf(marker);
+  if (idx === -1) return <>{text}</>;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <span className="font-bold text-white">{marker}</span>
+      {text.slice(idx + marker.length)}
+    </>
+  );
+}
+
 const Experience = () => {
   const { t, language } = useLanguage();
   const data = experiences[language];
@@ -49,7 +62,7 @@ const Experience = () => {
                     {exp.highlights.map((h, i) => (
                       <li key={i} className="text-sm text-gray-300 flex gap-2">
                         <span className="text-purple-400 mt-0.5 flex-shrink-0">▸</span>
-                        {h}
+                        <span>{renderHighlight(h)}</span>
                       </li>
                     ))}
                   </ul>

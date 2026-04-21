@@ -2,8 +2,13 @@
 
 import React, { useState } from "react";
 import ProjectCard from "../sub/ProjectCard";
+import { type ProjectVariant } from "../sub/ProjectCardHeader";
 import { useLanguage } from "@/context/LanguageContext";
 import { projects } from "@/constants/content";
+
+const VARIANTS: ProjectVariant[] = [
+  "vpa", "gitops", "rollouts", "eks", "cicd", "cost", "oncall", "branch", "docker-cache", "social",
+];
 
 const Projects = () => {
   const [showAll, setShowAll] = useState(false);
@@ -38,6 +43,7 @@ const Projects = () => {
             impactStat={p.impactStat}
             impactLabel={p.impactLabel}
             githubUrl={p.githubUrl}
+            variant={VARIANTS[i]}
           />
         ))}
       </div>

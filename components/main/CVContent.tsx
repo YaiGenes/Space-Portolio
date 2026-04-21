@@ -5,10 +5,24 @@ import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 import { cvText } from "@/constants/content";
 
+function highlightCHF(text: string) {
+  const marker = "CHF 642K+";
+  const idx = text.indexOf(marker);
+  if (idx === -1) return <>{text}</>;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <strong style={{ color: "#000", fontWeight: "800" }}>{marker}</strong>
+      {text.slice(idx + marker.length)}
+    </>
+  );
+}
+
 export default function CVContent() {
   const { language } = useLanguage();
   const cv = cvText[language];
   const s = cv.sections;
+  const c = language !== "en"; // compact mode for DE/FR (longer translations)
 
   return (
     <div className="cv-outer bg-white shadow-2xl" style={{ width: "794px", height: "1123px", overflow: "hidden" }}>
@@ -124,7 +138,7 @@ export default function CVContent() {
 
           {/* Summary */}
           <div className="mb-3" style={{ textAlign: "justify" }}>
-            <p style={{ fontSize: "10.5px", lineHeight: "1.6", color: "#333" }}>
+            <p style={{ fontSize: c ? "9.5px" : "10.5px", lineHeight: c ? "1.5" : "1.6", color: "#333" }}>
               {cv.summary}{" "}
               <strong>Currently at Hydrolix (Oyster HR Switzerland GmbH) since Jul 2024</strong>, managing <strong>234+ multi-cloud Kubernetes clusters</strong> (AWS, GCP, Linode) for Disney, Hulu, Fox, and Viacom18.
               Delivered a combined estimated <strong>CHF 642K+ in compute savings, engineering time, and avoided costs</strong> over two years — VPA confirmed at -25.9% cost/TB by team lead; ArgoCD rollout platform cut 3–4 week releases to 3–4 days (~360 SRE-hrs/yr saved). <em style={{ fontSize: "9px", color: "#888" }}>(USD figures converted at 0.783 CHF/USD, Apr 2026)</em>
@@ -138,15 +152,19 @@ export default function CVContent() {
               <p style={{ fontSize: "9px", fontWeight: "700", color: "#7b5ea7" }}>{s.hydrolix.split("CHF 642K+")[0]}<strong style={{ fontSize: "10px" }}>CHF 642K+</strong>{s.hydrolix.split("CHF 642K+")[1]}</p>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "3px 12px" }}>
-              <p style={{ fontSize: "9px", color: "#333" }}>▸ <strong>CHF 132K–263K/yr</strong> saved via VPA (sea-2 alone, 80→21 nodes)</p>
-              <p style={{ fontSize: "9px", color: "#333" }}>▸ <strong>CHF 63K–110K+/yr</strong> fleet-wide compute reduction (-25.9% CHF/TB)</p>
-              <p style={{ fontSize: "9px", color: "#333" }}>▸ <strong>CHF 36K/yr</strong> release automation (360 SRE-hrs/yr × CHF 100/hr)</p>
-              <p style={{ fontSize: "9px", color: "#333" }}>▸ <strong>CHF 16K–63K</strong> prevented customer incidents (25 Prometheus stacks)</p>
-              <p style={{ fontSize: "9px", color: "#333" }}>▸ <strong>CHF 6K/yr</strong> avoided on-call via OOM auto-remediation</p>
-              <p style={{ fontSize: "9px", color: "#333" }}>▸ <strong>CHF 12K–23K</strong> avoided over-capacity (Hulu SB, Viacom18 IPL HTEs)</p>
-              <p style={{ fontSize: "9px", color: "#333" }}>▸ <strong>27% AWS cost reduction</strong> at Triggle Spain</p>
-              <p style={{ fontSize: "9px", color: "#333" }}>▸ <strong>82.5% extended support cost cut</strong> (EKS 1.24→1.29 upgrade)</p>
-              <p style={{ fontSize: "9px", color: "#333" }}>▸ <strong>Zero-cost on-call platform</strong> — Grafana OnCall replaced paid UptimeRobot</p>
+              {[
+                <><strong>CHF 132K–263K/yr</strong> saved via VPA (sea-2 alone, 80→21 nodes)</>,
+                <><strong>CHF 63K–110K+/yr</strong> fleet-wide compute reduction (-25.9% CHF/TB)</>,
+                <><strong>CHF 36K/yr</strong> release automation (360 SRE-hrs/yr × CHF 100/hr)</>,
+                <><strong>CHF 16K–63K</strong> prevented customer incidents (25 Prometheus stacks)</>,
+                <><strong>CHF 6K/yr</strong> avoided on-call via OOM auto-remediation</>,
+                <><strong>CHF 12K–23K</strong> avoided over-capacity (Hulu SB, Viacom18 IPL HTEs)</>,
+                <><strong>27% AWS cost reduction</strong> at Triggle Spain</>,
+                <><strong>82.5% extended support cost cut</strong> (EKS 1.24→1.29 upgrade)</>,
+                <><strong>Zero-cost on-call platform</strong> — Grafana OnCall replaced paid UptimeRobot</>,
+              ].map((item, i) => (
+                <p key={i} style={{ fontSize: c ? "8.5px" : "9px", color: "#333" }}>▸ {item}</p>
+              ))}
             </div>
           </div>
 
@@ -157,40 +175,40 @@ export default function CVContent() {
             </h2>
 
             {/* Hydrolix */}
-            <div className="mb-3">
+            <div className={c ? "mb-2" : "mb-3"}>
               <div className="flex justify-between">
                 <span style={{ fontSize: "10px", color: "#7b5ea7", fontWeight: "600" }}>Jul 2024 – Present</span>
                 <span style={{ fontSize: "10px", color: "#888" }}>{cv.jobTypes.remote}</span>
               </div>
               <p style={{ fontSize: "11px", fontWeight: "700", color: "#1a1a1a", marginTop: "1px" }}>Site Reliability Engineer — <span style={{ fontWeight: "500" }}>Hydrolix</span></p>
-              <p style={{ fontSize: "10px", lineHeight: "1.55", color: "#333", marginTop: "2px", textAlign: "justify" }}>
-                {cv.hydrolix}
+              <p style={{ fontSize: c ? "9px" : "10px", lineHeight: c ? "1.45" : "1.55", color: "#333", marginTop: "2px", textAlign: "justify" }}>
+                {highlightCHF(cv.hydrolix)}
               </p>
-              <p style={{ fontSize: "9px", color: "#666", marginTop: "2px", fontStyle: "italic" }}>
+              <p style={{ fontSize: c ? "8px" : "9px", color: "#666", marginTop: "2px", fontStyle: "italic" }}>
                 Kubernetes (LKE/EKS/GKE) · ArgoCD · Go · Pulumi · Prometheus · Grafana · Argo Workflows · VPA · Helm · Terraform · AWS · GCP · Linode
               </p>
             </div>
 
             {/* Triggle */}
-            <div className="mb-3">
+            <div className={c ? "mb-2" : "mb-3"}>
               <div className="flex justify-between">
                 <span style={{ fontSize: "10px", color: "#7b5ea7", fontWeight: "600" }}>Jul 2023 – Jul 2024 (1 year)</span>
                 <span style={{ fontSize: "10px", color: "#888" }}>{cv.jobTypes.employee}</span>
               </div>
               <p style={{ fontSize: "11px", fontWeight: "700", color: "#1a1a1a", marginTop: "1px" }}>Senior SRE — <span style={{ fontWeight: "500" }}>Triggle Spain SLU</span></p>
-              <p style={{ fontSize: "10px", lineHeight: "1.55", color: "#333", marginTop: "2px", textAlign: "justify" }}>
+              <p style={{ fontSize: c ? "9px" : "10px", lineHeight: c ? "1.45" : "1.55", color: "#333", marginTop: "2px", textAlign: "justify" }}>
                 {cv.triggle}
               </p>
             </div>
 
             {/* atSistemas */}
-            <div className="mb-3">
+            <div className={c ? "mb-2" : "mb-3"}>
               <div className="flex justify-between">
                 <span style={{ fontSize: "10px", color: "#7b5ea7", fontWeight: "600" }}>Feb 2023 – Jul 2023 (6 months)</span>
                 <span style={{ fontSize: "10px", color: "#888" }}>{cv.jobTypes.employee}</span>
               </div>
               <p style={{ fontSize: "11px", fontWeight: "700", color: "#1a1a1a", marginTop: "1px" }}>Senior SRE — <span style={{ fontWeight: "500" }}>atSistemas Consulting</span></p>
-              <p style={{ fontSize: "10px", lineHeight: "1.55", color: "#333", marginTop: "2px" }}>
+              <p style={{ fontSize: c ? "9px" : "10px", lineHeight: c ? "1.45" : "1.55", color: "#333", marginTop: "2px" }}>
                 {cv.atSistemas}
               </p>
             </div>
@@ -202,7 +220,7 @@ export default function CVContent() {
                 <span style={{ fontSize: "10px", color: "#888" }}>{cv.jobTypes.employee}</span>
               </div>
               <p style={{ fontSize: "11px", fontWeight: "700", color: "#1a1a1a", marginTop: "1px" }}>DevOps Lifecycle Engineer — <span style={{ fontWeight: "500" }}>Accenture Spain</span></p>
-              <p style={{ fontSize: "10px", lineHeight: "1.55", color: "#333", marginTop: "2px" }}>
+              <p style={{ fontSize: c ? "9px" : "10px", lineHeight: c ? "1.45" : "1.55", color: "#333", marginTop: "2px" }}>
                 {cv.accenture}
               </p>
             </div>
