@@ -948,23 +948,16 @@ function CostSimulator() {
           if (v >= 1_000)     return `${n < 0 ? "-" : "+"}${sym}${(v / 1_000).toFixed(0)}K`;
           return `${n < 0 ? "-" : "+"}${sym}${Math.round(v)}`;
         };
-        const delivers = [
-          "5+ yrs SRE across 234+ multi-cloud K8s clusters",
-          "GitOps adoption — 468 apps under ArgoCD from day 1",
-          "VPA + HPA rollout framework, ready to deploy",
-          "On-call, runbooks & auto-remediation included",
-          "Savings compound year-over-year, no extra headcount",
-          "Saved CHF 642K+ at my last company over 2 years",
-        ];
+        const p = t.pitch;
         return (
           <div className="mt-5 rounded-xl overflow-hidden"
             style={{ border: "1px solid #7b5ea740" }}>
             <div className="flex items-center justify-between px-4 py-2.5"
               style={{ background: "#0a0612", borderBottom: "1px solid #7b5ea720" }}>
               <span className="text-[13px] font-mono text-purple-400 uppercase tracking-widest">
-                // why hire yaiser?
+                {p.header}
               </span>
-              <span className="text-[11px] text-gray-500 font-mono">the business case</span>
+              <span className="text-[11px] text-gray-500 font-mono">{p.sub}</span>
             </div>
 
             <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-6"
@@ -972,12 +965,12 @@ function CostSimulator() {
 
               {/* Left — ROI model */}
               <div>
-                <p className="text-[11px] text-gray-500 uppercase tracking-widest mb-3">Year-1 financial model</p>
+                <p className="text-[11px] text-gray-500 uppercase tracking-widest mb-3">{p.roiTitle}</p>
                 <div className="space-y-2">
                   {[
-                    { label: "Projected savings",       val: fmtBig(total),            color: "#4ade80" },
-                    { label: `Senior SRE cost (~${sym}${Math.round(hourlyRate * rate)}/hr)`, val: `-${sym}${Math.round(annualSreCost * rate / 1000)}K`, color: "#f87171" },
-                    { label: "Net Year-1 value",         val: fmt(netYear1),             color: netYear1 >= 0 ? "#4ade80" : "#f87171" },
+                    { label: p.savings,       val: fmtBig(total),            color: "#4ade80" },
+                    { label: `${p.sreCost} (~${sym}${Math.round(hourlyRate * rate)}/hr)`, val: `-${sym}${Math.round(annualSreCost * rate / 1000)}K`, color: "#f87171" },
+                    { label: p.netValue,       val: fmt(netYear1),             color: netYear1 >= 0 ? "#4ade80" : "#f87171" },
                   ].map(row => (
                     <div key={row.label} className="flex items-center justify-between px-3 py-2 rounded text-[13px]"
                       style={{ background: "#0c0918", border: "1px solid #1a1030" }}>
@@ -988,12 +981,12 @@ function CostSimulator() {
                   <div className="flex items-center gap-3 px-3 py-3 rounded mt-1"
                     style={{ background: "#0f0620", border: "1px solid #7b5ea740" }}>
                     <div className="flex-1 text-center">
-                      <p className="text-[11px] text-gray-500 mb-0.5">ROI</p>
+                      <p className="text-[11px] text-gray-500 mb-0.5">{p.roi}</p>
                       <p className="text-[26px] font-black" style={{ color: "#c084fc" }}>{roi}×</p>
                     </div>
                     <div className="w-px h-10" style={{ background: "#2a1a40" }} />
                     <div className="flex-1 text-center">
-                      <p className="text-[11px] text-gray-500 mb-0.5">self-funds in</p>
+                      <p className="text-[11px] text-gray-500 mb-0.5">{p.selfFunds}</p>
                       <p className="text-[26px] font-black" style={{ color: "#38bdf8" }}>~{selfFundWks}wk</p>
                     </div>
                   </div>
@@ -1002,9 +995,9 @@ function CostSimulator() {
 
               {/* Right — what you get */}
               <div>
-                <p className="text-[11px] text-gray-500 uppercase tracking-widest mb-3">What you actually buy</p>
+                <p className="text-[11px] text-gray-500 uppercase tracking-widest mb-3">{p.deliversTitle}</p>
                 <div className="space-y-2 mb-5">
-                  {delivers.map((d, i) => (
+                  {p.delivers.map((d, i) => (
                     <div key={i} className="flex items-start gap-2.5 text-[13px]">
                       <span style={{ color: "#4ade80", flexShrink: 0, marginTop: "2px" }}>✓</span>
                       <span className="text-gray-300 leading-snug">{d}</span>
@@ -1015,7 +1008,7 @@ function CostSimulator() {
                   target="_blank" rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-[13px] font-bold transition-all hover:brightness-110"
                   style={{ background: "linear-gradient(135deg, #7b5ea7, #38bdf8)", color: "#fff" }}>
-                  ↗ Book a 30-min intro call
+                  {p.cta}
                 </a>
               </div>
             </div>
@@ -1024,9 +1017,9 @@ function CostSimulator() {
             <div className="px-5 py-4 text-center"
               style={{ background: "#080410", borderTop: "1px solid #7b5ea720" }}>
               <p className="text-[12px] text-gray-400 italic leading-relaxed">
-                "Don't hire an SRE to react to incidents.{" "}
-                <span style={{ color: "#c084fc" }}>Hire one to build the systems that prevent them</span>
-                {" "}— and fund their own salary while doing it."
+                &ldquo;{p.tagline}
+                <span style={{ color: "#c084fc" }}>{p.taglineAccent}</span>
+                {p.taglineSuffix}&rdquo;
               </p>
             </div>
           </div>

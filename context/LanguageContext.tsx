@@ -64,6 +64,25 @@ export const translations = {
       problem: "Problem", solution: "Solution", technologies: "Technologies Used", outcome: "Outcome",
       showAll: "\u2193 Show all 10 projects", showLess: "\u2191 Show less",
     },
+    pitch: {
+      header: "// why hire yaiser?", sub: "the business case",
+      roiTitle: "Year-1 financial model",
+      savings: "Projected savings", sreCost: "Senior SRE cost", netValue: "Net Year-1 value",
+      roi: "ROI", selfFunds: "self-funds in",
+      deliversTitle: "What you actually buy",
+      delivers: [
+        "5+ yrs SRE across 234+ multi-cloud K8s clusters",
+        "GitOps adoption \u2014 468 apps under ArgoCD from day\u00a01",
+        "VPA + HPA rollout framework, ready to deploy",
+        "On-call, runbooks & auto-remediation included",
+        "Savings compound year-over-year, no extra headcount",
+        "Saved CHF\u00a0642K+ at my last company over 2\u00a0years",
+      ],
+      cta: "\u2197 Book a 30-min intro call",
+      tagline: "Don\u2019t hire an SRE to react to incidents.\u00a0",
+      taglineAccent: "Hire one to build the systems that prevent them",
+      taglineSuffix: "\u00a0\u2014 and fund their own salary while doing it.",
+    },
   },
   de: {
     nav: {
@@ -123,6 +142,25 @@ export const translations = {
     projectLabels: {
       problem: "Problem", solution: "L\u00f6sung", technologies: "Verwendete Technologien", outcome: "Ergebnis",
       showAll: "\u2193 Alle 10 Projekte anzeigen", showLess: "\u2191 Weniger anzeigen",
+    },
+    pitch: {
+      header: "// warum Yaiser einstellen?", sub: "das Business-Case",
+      roiTitle: "Finanzielles Modell \u2013 Jahr\u00a01",
+      savings: "Prognostizierte Einsparungen", sreCost: "Senior-SRE-Kosten", netValue: "Nettowert Jahr\u00a01",
+      roi: "ROI", selfFunds: "amortisiert sich in",
+      deliversTitle: "Was Sie wirklich kaufen",
+      delivers: [
+        "5+ Jahre SRE \u00fcber 234+ Multi-Cloud-K8s-Cluster",
+        "GitOps-Einf\u00fchrung \u2014 468 Apps unter ArgoCD ab Tag\u00a01",
+        "VPA + HPA Rollout-Framework, sofort einsatzbereit",
+        "On-Call, Runbooks & automatische Remediation inklusive",
+        "Einsparungen wachsen j\u00e4hrlich \u2014 ohne zus\u00e4tzliches Personal",
+        "CHF\u00a0642K+ gespart beim letzten Unternehmen in 2\u00a0Jahren",
+      ],
+      cta: "\u2197 30-min\u00fctigen Einf\u00fchrungsanruf buchen",
+      tagline: "Stellen Sie keinen SRE ein, um auf Vorf\u00e4lle zu reagieren.\u00a0",
+      taglineAccent: "Stellen Sie einen ein, der Systeme baut, die sie verhindern",
+      taglineSuffix: "\u00a0\u2014 und sein Gehalt dabei selbst finanziert.",
     },
   },
   fr: {
@@ -184,6 +222,25 @@ export const translations = {
       problem: "Probl\u00e8me", solution: "Solution", technologies: "Technologies utilis\u00e9es", outcome: "R\u00e9sultat",
       showAll: "\u2193 Voir les 10 projets", showLess: "\u2191 R\u00e9duire",
     },
+    pitch: {
+      header: "// pourquoi recruter Yaiser\u00a0?", sub: "le dossier business",
+      roiTitle: "Mod\u00e8le financier \u2013 An\u00a01",
+      savings: "\u00c9conomies projet\u00e9es", sreCost: "Co\u00fbt SRE senior", netValue: "Valeur nette An\u00a01",
+      roi: "ROI", selfFunds: "s\u2019autofinance en",
+      deliversTitle: "Ce que vous achetez vraiment",
+      delivers: [
+        "5+ ans SRE sur 234+ clusters K8s multi-cloud",
+        "Adoption GitOps \u2014 468 apps sous ArgoCD d\u00e8s le jour\u00a01",
+        "Framework VPA + HPA pr\u00eat \u00e0 d\u00e9ployer",
+        "Astreinte, runbooks & auto-rem\u00e9diation inclus",
+        "Les \u00e9conomies s\u2019accumulent chaque ann\u00e9e, sans recrutement suppl\u00e9mentaire",
+        "CHF\u00a0642K+ \u00e9conomis\u00e9s dans ma derni\u00e8re entreprise en 2\u00a0ans",
+      ],
+      cta: "\u2197 R\u00e9server un appel de 30\u00a0min",
+      tagline: "Ne recrutez pas un SRE pour r\u00e9agir aux incidents.\u00a0",
+      taglineAccent: "Recrutez-en un pour construire les syst\u00e8mes qui les pr\u00e9viennent",
+      taglineSuffix: "\u00a0\u2014 et qui financent son salaire en chemin.",
+    },
   },
 };
 
@@ -214,6 +271,14 @@ export interface T {
   stats: { years: string; clusters: string; compute: string; saved: string; commits: string };
   contact: { sub: string; email: string; copy: string; copied: string };
   projectLabels: { problem: string; solution: string; technologies: string; outcome: string; showAll: string; showLess: string };
+  pitch: {
+    header: string; sub: string; roiTitle: string;
+    savings: string; sreCost: string; netValue: string;
+    roi: string; selfFunds: string;
+    deliversTitle: string;
+    delivers: string[];
+    cta: string; tagline: string; taglineAccent: string; taglineSuffix: string;
+  };
 }
 
 // ─── External store (useSyncExternalStore — React's official external-store API)
